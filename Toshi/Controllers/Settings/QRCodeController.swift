@@ -16,8 +16,47 @@
 import UIKit
 import SweetUIKit
 import CoreImage
+import MobileCoreServices
+
+class SelectableImageView: UIImageView {
+    private var username: String
+
+    init(username: String) {
+        self.username = username
+
+        super.init(frame: .zero)
+
+        isUserInteractionEnabled = true
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override var canBecomeFirstResponder: Bool {
+        return true
+    }
+
+    override func becomeFirstResponder() -> Bool {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+
+        return super.becomeFirstResponder()
+    }
+
+    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        return action == #selector(copy(_:))
+    }
+
+    override func copy(_ sender: Any?) {
+        UIPasteboard.general.items = [
+            [kUTTypeJPEG as String: image!],
+            [kUTTypeUTF8PlainText as String: username]
+        ]
+    }
+}
 
 class QRCodeController: UIViewController {
+    private var username: String!
 
     static let addUsernameBasePath = "https://app.toshi.org/add/"
     static let addUserPath = "/add/"
@@ -28,13 +67,16 @@ class QRCodeController: UIViewController {
         return .default
     }
 
-    private lazy var qrCodeImageView: UIImageView = UIImageView()
+    private lazy var qrCodeImageView: SelectableImageView = {
+        return SelectableImageView(username: "\(QRCodeController.addUsernameBasePath)\(username!)")
+    }()
 
-    private lazy var subtitleLabel = TextLabel(Localized("profile_qr_code_subtitle"))
+    private let subtitleLabel = TextLabel(Localized("profile_qr_code_subtitle"))
 
     convenience init(for username: String, name: String) {
         self.init(nibName: nil, bundle: nil)
 
+        self.username = username
         title = Localized("profile_qr_code_title")
 
         qrCodeImageView.image = UIImage.imageQRCode(for: "\(QRCodeController.addUsernameBasePath)\(username)", resizeRate: 20.0)
@@ -48,6 +90,10 @@ class QRCodeController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        longPressGesture.minimumPressDuration = 0.2
+        qrCodeImageView.addGestureRecognizer(longPressGesture)
         
         view.backgroundColor = Theme.lightGrayBackgroundColor
         
@@ -92,6 +138,16 @@ class QRCodeController: UIViewController {
         super.viewWillAppear(animated)
 
         preferLargeTitleIfPossible(true)
+    }
+
+    @objc private func handleLongPress(_ sender: UILongPressGestureRecognizer) {
+        guard sender.state == .began  else { return }
+
+        if let recognizerView = sender.view, let recognizerSuperView = recognizerView.superview, recognizerView.becomeFirstResponder() {
+            let menuController = UIMenuController.shared
+            menuController.setTargetRect(recognizerView.frame, in: recognizerSuperView)
+            menuController.setMenuVisible(true, animated:true)
+        }
     }
 }
 
