@@ -18,11 +18,11 @@ import SweetUIKit
 import CoreImage
 import MobileCoreServices
 
-class SelectableImageView: UIImageView {
-    private var username: String
+final class SelectableImageView: UIImageView {
+    private var stringRepresentation: String
 
-    init(username: String) {
-        self.username = username
+    init(stringRepresentation: String) {
+        self.stringRepresentation = stringRepresentation
 
         super.init(frame: .zero)
 
@@ -50,13 +50,13 @@ class SelectableImageView: UIImageView {
     override func copy(_ sender: Any?) {
         UIPasteboard.general.items = [
             [kUTTypeJPEG as String: image!],
-            [kUTTypeUTF8PlainText as String: username]
+            [kUTTypeUTF8PlainText as String: stringRepresentation]
         ]
     }
 }
 
 class QRCodeController: UIViewController {
-    private var username: String!
+    private var username: String?
 
     static let addUsernameBasePath = "https://app.toshi.org/add/"
     static let addUserPath = "/add/"
@@ -68,7 +68,7 @@ class QRCodeController: UIViewController {
     }
 
     private lazy var qrCodeImageView: SelectableImageView = {
-        return SelectableImageView(username: "\(QRCodeController.addUsernameBasePath)\(username!)")
+        return SelectableImageView(stringRepresentation: "\(QRCodeController.addUsernameBasePath)\(username!)")
     }()
 
     private let subtitleLabel = TextLabel(Localized("profile_qr_code_subtitle"))
