@@ -7,7 +7,7 @@ protocol ChatButtonsSelectionDelegate: class {
 }
 
 final class ChatButtonsView: UIView {
-    static let height: CGFloat = 54
+    static let height: CGFloat = 59
     
     weak var delegate: ChatButtonsSelectionDelegate?
     private var heightConstraint: NSLayoutConstraint?
@@ -22,13 +22,13 @@ final class ChatButtonsView: UIView {
     
     private(set) lazy var collectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: ChatButtonsViewLayout())
-        view.backgroundColor = .clear
+        view.backgroundColor = Theme.viewBackgroundColor
         view.isOpaque = false
         view.delegate = self
         view.dataSource = self
-        view.contentInset = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
+        view.contentInset = UIEdgeInsets(top: 8, left: 15, bottom: 0, right: 15)
         view.alwaysBounceHorizontal = true
-        
+
         view.register(ChatButtonsViewCell.self, forCellWithReuseIdentifier: ChatButtonsViewCell.reuseIdentifier)
         
         return view
