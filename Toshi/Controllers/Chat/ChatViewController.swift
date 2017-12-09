@@ -186,8 +186,6 @@ final class ChatViewController: UIViewController, UINavigationControllerDelegate
 
         viewModel.markAllMessagesAsRead()
         SignalNotificationManager.updateUnreadMessagesNumber()
-
-        preferLargeTitleIfPossible(true)
     }
 
     private func updateBalance() {

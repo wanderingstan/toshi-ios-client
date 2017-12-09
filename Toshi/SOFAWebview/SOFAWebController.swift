@@ -117,6 +117,7 @@ final class SOFAWebController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationController?.preferLargeTitleIfPossible(false)
         view.addSubview(webView)
         view.addSubview(toolbar)
 
@@ -126,7 +127,7 @@ final class SOFAWebController: UIViewController {
         } else {
             anchor = self.bottomLayoutGuide.topAnchor
         }
-        
+
         NSLayoutConstraint.activate([
             self.toolbar.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             self.toolbar.rightAnchor.constraint(equalTo: self.view.rightAnchor),
