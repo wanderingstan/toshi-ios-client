@@ -120,24 +120,24 @@ final class SOFAWebController: UIViewController {
         view.addSubview(webView)
         view.addSubview(toolbar)
 
-        NSLayoutConstraint.activate([
-            self.toolbar.leftAnchor.constraint(equalTo: self.view.leftAnchor),
-            self.toolbar.rightAnchor.constraint(equalTo: self.view.rightAnchor),
-            self.toolbar.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
-        ])
-
-        toolbar.height(44)
-        toolbar.bottom(to: layoutGuide())
-        toolbar.left(to: view)
-        webView.edgesToSuperview(excluding: .bottom)
-
         let anchor: NSLayoutYAxisAnchor
         if #available(iOS 11, *) {
             anchor = self.view.safeAreaLayoutGuide.bottomAnchor
         } else {
             anchor = self.bottomLayoutGuide.topAnchor
         }
-        webView.bottomAnchor.constraint(equalTo: anchor).isActive = true
+        
+        NSLayoutConstraint.activate([
+            self.toolbar.leftAnchor.constraint(equalTo: self.view.leftAnchor),
+            self.toolbar.rightAnchor.constraint(equalTo: self.view.rightAnchor),
+            self.toolbar.bottomAnchor.constraint(equalTo: anchor)
+        ])
+
+        toolbar.height(44)
+        toolbar.bottom(to: layoutGuide())
+        toolbar.left(to: view)
+        webView.edgesToSuperview(excluding: .bottom)
+        webView.bottom(to: self.toolbar)
     }
 
     func load(url: URL) {
