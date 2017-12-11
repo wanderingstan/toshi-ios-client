@@ -56,7 +56,7 @@ class QRCodeController: UIViewController {
 
         contentView.edges(to: view)
         contentView.width(to: view)
-        contentView.height(to: layoutGuide(), relation: .equalOrGreater)
+        contentView.height(to: safeLayoutGuide, relation: .equalOrGreater)
         
         contentView.addSubview(subtitleLabel)
         contentView.addSubview(qrCodeImageView)

@@ -121,17 +121,10 @@ final class SOFAWebController: UIViewController {
         view.addSubview(webView)
         view.addSubview(toolbar)
 
-        let anchor: NSLayoutYAxisAnchor
-        if #available(iOS 11, *) {
-            anchor = self.view.safeAreaLayoutGuide.bottomAnchor
-        } else {
-            anchor = self.bottomLayoutGuide.topAnchor
-        }
-
         NSLayoutConstraint.activate([
             self.toolbar.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             self.toolbar.rightAnchor.constraint(equalTo: self.view.rightAnchor),
-            self.toolbar.bottomAnchor.constraint(equalTo: anchor)
+            self.toolbar.bottomAnchor.constraint(equalTo: safeLayoutGuide.bottomAnchor)
         ])
 
         toolbar.height(44)

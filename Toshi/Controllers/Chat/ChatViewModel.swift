@@ -36,6 +36,7 @@ final class ChatViewModel {
     init(output: ChatViewModelOutput, thread: TSThread) {
         self.output = output
         self.thread = thread
+        self.interactor = ChatInteractor(output: self.output, thread: self.thread)
 
         storageManager = TSStorageManager.shared()
 
@@ -55,9 +56,7 @@ final class ChatViewModel {
 
     private(set) var thread: TSThread
 
-    private(set) lazy var interactor: ChatInteractor = {
-        ChatInteractor(output: self.output, thread: self.thread)
-    }()
+    let interactor: ChatInteractor
 
     var contact: TokenUser? {
         return contactsManager?.tokenContact(forAddress: thread.contactIdentifier())

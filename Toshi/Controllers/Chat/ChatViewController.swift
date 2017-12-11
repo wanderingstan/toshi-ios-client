@@ -214,13 +214,10 @@ final class ChatViewController: UIViewController, UINavigationControllerDelegate
         tableView.left(to: view)
         tableView.right(to: view)
 
+        textInputViewBottomConstraint = textInputView.bottomAnchor.constraint(equalTo: safeLayoutGuide.bottomAnchor)
+        textInputViewBottomConstraint?.isActive = true
+
         textInputView.left(to: view)
-        if #available(iOS 11.0, *) {
-            textInputViewBottomConstraint = textInputView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor)
-            textInputViewBottomConstraint?.isActive = true
-        } else {
-            textInputViewBottomConstraint = textInputView.bottom(to: view)
-        }
         textInputView.right(to: view)
         textInputViewHeightConstraint = textInputView.height(ChatInputTextPanel.defaultHeight)
         
@@ -229,13 +226,7 @@ final class ChatViewController: UIViewController, UINavigationControllerDelegate
         buttonsView.bottomToTop(of: textInputView)
         buttonsView.trailingToSuperview()
 
-        let anchor: NSLayoutYAxisAnchor
-        if #available(iOS 11.0, *) {
-            anchor = self.view.safeAreaLayoutGuide.topAnchor
-        } else {
-            anchor = topLayoutGuide.bottomAnchor
-        }
-        ethereumPromptView.topAnchor.constraint(equalTo: anchor).isActive = true // .top(to: view, offset: 64)
+        ethereumPromptView.topAnchor.constraint(equalTo: safeLayoutGuide.topAnchor).isActive = true
         ethereumPromptView.left(to: view)
         ethereumPromptView.right(to: view)
         ethereumPromptView.height(ChatFloatingHeaderView.height)

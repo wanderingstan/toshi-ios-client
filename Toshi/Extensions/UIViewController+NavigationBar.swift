@@ -31,7 +31,7 @@ extension UIViewController {
         }
     }
 
-    func layoutGuide() -> UILayoutGuide {
+    var safeLayoutGuide: UILayoutGuide {
         if #available(iOS 11.0, *) {
             return view.safeAreaLayoutGuide
         } else {

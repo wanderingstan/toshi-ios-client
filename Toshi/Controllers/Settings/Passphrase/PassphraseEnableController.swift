@@ -94,7 +94,7 @@ class PassphraseEnableController: UIViewController {
 
         contentView.edges(to: view)
         contentView.width(to: view)
-        contentView.height(to: layoutGuide(), relation: .equalOrGreater)
+        contentView.height(to: safeLayoutGuide, relation: .equalOrGreater)
 
         contentView.addSubview(titleLabel)
         contentView.addSubview(textLabel)

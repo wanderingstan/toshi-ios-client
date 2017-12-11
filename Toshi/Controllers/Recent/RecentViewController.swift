@@ -119,7 +119,7 @@ class RecentViewController: SweetTableController, Emptiable {
         
         view.addSubview(emptyView)
         emptyView.actionButton.addTarget(self, action: #selector(emptyViewButtonPressed(_:)), for: .touchUpInside)
-        emptyView.edges(to: layoutGuide(), insets: UIEdgeInsets(top: tableHeaderHeight, left: 0, bottom: 0, right: 0))
+        emptyView.edges(to: safeLayoutGuide, insets: UIEdgeInsets(top: tableHeaderHeight, left: 0, bottom: 0, right: 0))
     }
 
     func registerNotifications() {
