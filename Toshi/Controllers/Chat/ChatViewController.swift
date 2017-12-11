@@ -206,8 +206,8 @@ final class ChatViewController: UIViewController, UINavigationControllerDelegate
 
     private func addSubviewsAndConstraints() {
         view.addSubview(tableView)
-        view.addSubview(textInputView)
         view.addSubview(buttonsView)
+        view.addSubview(textInputView)
         view.addSubview(ethereumPromptView)
 
         tableView.top(to: view)
