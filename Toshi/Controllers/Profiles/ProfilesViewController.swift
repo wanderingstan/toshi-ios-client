@@ -144,8 +144,11 @@ final class ProfilesViewController: UITableViewController, Emptiable {
         preferLargeTitleIfPossible(true)
         showOrHideEmptyState()
 
-        guard dataSource.type == .updateGroupChat else { return }
-        dataSource.excludedProfilesIds = []
+        dataSource.searchText = ""
+        
+        if dataSource.type != .updateGroupChat {
+            dataSource.excludedProfilesIds = []
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -253,7 +256,6 @@ final class ProfilesViewController: UITableViewController, Emptiable {
         view.addSubview(emptyView)
         emptyView.actionButton.addTarget(self, action: #selector(emptyViewButtonPressed(_:)), for: .touchUpInside)
         emptyView.edges(to: layoutGuide())
-        showOrHideEmptyState()
     }
     
     private func setupNavigationBarButtons() {
@@ -368,7 +370,7 @@ extension ProfilesViewController: UISearchResultsUpdating {
     
     public func updateSearchResults(for searchController: UISearchController) {
 
-        self.dataSource.searchText = searchController.searchBar.text ?? ""
+        dataSource.searchText = searchController.searchBar.text ?? ""
     }
 }
 
@@ -413,5 +415,7 @@ extension ProfilesViewController: ProfilesDatasourceChangesOutput {
         } else {
             tableView.reloadData()
         }
+
+        showOrHideEmptyState()
     }
 }
