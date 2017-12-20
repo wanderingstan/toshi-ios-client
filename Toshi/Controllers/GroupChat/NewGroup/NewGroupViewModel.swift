@@ -72,7 +72,7 @@ final class NewGroupViewModel {
 
         completeActionDelegate?.groupViewModelDidStartCreateOrUpdate()
 
-        ChatInteractor.createGroup(with: NSMutableArray(array: groupInfo.participantsIDs), name: groupInfo.title, avatar: groupInfo.avatar, completion: { [weak self] success in
+        ChatInteractor.createGroup(with: NSMutableArray(array: groupInfo.participantsIDs), name: groupInfo.title, avatar: groupInfo.avatar, completion: { [weak self] _ in
 
             self?.completeActionDelegate?.groupViewModelDidFinishCreateOrUpdate()
         })

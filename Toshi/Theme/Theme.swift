@@ -154,6 +154,10 @@ extension Theme {
     static var offlineAlertBackgroundColor: UIColor {
         return UIColor(hex: "5B5B5B")
     }
+
+    static var inactiveButtonColor: UIColor {
+        return UIColor(hex: "B6BCBF")
+    }
 }
 
 extension Theme {

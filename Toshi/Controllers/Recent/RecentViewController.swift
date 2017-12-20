@@ -62,6 +62,10 @@ class RecentViewController: SweetTableController, Emptiable {
         }
     }
 
+    required init?(coder _: NSCoder) {
+        fatalError()
+    }
+
     private func loadMessages() {
         uiDatabaseConnection.asyncRead { [weak self] transaction in
             self?.mappings.update(with: transaction)
@@ -72,10 +76,6 @@ class RecentViewController: SweetTableController, Emptiable {
         }
 
         registerNotifications()
-    }
-
-    required init?(coder _: NSCoder) {
-        fatalError()
     }
 
     override func viewDidLoad() {

@@ -284,7 +284,10 @@
 
 /* Group Chat */
 "profiles_new_group" = "New Group";
+"accept_button_title" = "Accept";
+"decline_button_title" = "Decline";
 
 /* Sharing */
 "sharing_action_item" = "Get Toshi, available for iOS and Android! (https://www.toshi.org)";
+
 
