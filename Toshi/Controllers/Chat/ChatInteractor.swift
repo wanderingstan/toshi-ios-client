@@ -170,10 +170,9 @@ final class ChatInteractor: NSObject {
             self?.output?.didFinishRequest()
 
             guard success, let json = json?.dictionary else {
-                DispatchQueue.main.async {
-                    self?.output?.didCatchError(error?.description ?? ToshiError.genericError.description)
-                    completion?(false)
-                }
+                self?.output?.didCatchError(error?.description ?? ToshiError.genericError.description)
+                completion?(false)
+
                 return
             }
 
