@@ -21,13 +21,13 @@ typealias TransactionSkeleton = (gas: String?, gasPrice: String?, transaction: S
 typealias BalanceCompletion = ((_ balance: NSDecimalNumber, _ error: ToshiError?) -> Void)
 
 class EthereumAPIClient: NSObject {
-
+    
     @objc static let shared: EthereumAPIClient = EthereumAPIClient()
-
+    
     private var mainTeapot: Teapot
-
+    
     private var switchedNetworkTeapot: Teapot
-
+    
     private var activeTeapot: Teapot {
         if NetworkSwitcher.shared.isDefaultNetworkActive {
             return mainTeapot
@@ -35,11 +35,11 @@ class EthereumAPIClient: NSObject {
             return switchedNetworkTeapot
         }
     }
-
+    
     private static var teapotUrl: String {
         return NetworkSwitcher.shared.activeNetworkBaseUrl
     }
-
+    
     private static let CachedBalanceKey = "CachedBalanceKey"
     private lazy var cache: Cache<NSDecimalNumber> = {
         do {
@@ -48,39 +48,39 @@ class EthereumAPIClient: NSObject {
             fatalError("Couldn't instantiate the balance cache")
         }
     }()
-
+    
     convenience init(mockTeapot: MockTeapot) {
         self.init()
         self.switchedNetworkTeapot = mockTeapot
         self.mainTeapot = mockTeapot
     }
-
+    
     private override init() {
         mainTeapot = Teapot(baseURL: URL(string: NetworkSwitcher.shared.defaultNetworkBaseUrl)!)
         switchedNetworkTeapot = Teapot(baseURL: URL(string: NetworkSwitcher.shared.defaultNetworkBaseUrl)!)
-
+        
         super.init()
     }
-
+    
     public func createUnsignedTransaction(parameters: [String: Any], completion: @escaping ((_ unsignedTransaction: String?, _ error: ToshiError?) -> Void)) {
-
+        
         transactionSkeleton(for: parameters) { skeleton, error in
             let transaction = skeleton.transaction
-
+            
             DispatchQueue.main.async {
                 completion(transaction, error)
             }
         }
     }
-
+    
     public func transactionSkeleton(for parameters: [String: Any], completion: @escaping ((_ skeleton: TransactionSkeleton, _ error: ToshiError?) -> Void)) {
-
+        
         let json = RequestParameter(parameters)
-
+        
         self.activeTeapot.post("/v1/tx/skel", parameters: json) { result in
             var resultJson: [String: Any]?
             var resultError: ToshiError?
-
+            
             switch result {
             case .success(let json, _):
                 resultJson = json?.dictionary
@@ -88,14 +88,14 @@ class EthereumAPIClient: NSObject {
                 resultError = ToshiError(withTeapotError: error, errorDescription: Localized("payment_error_message"))
                 DLog("\(error)")
             }
-
+            
             DispatchQueue.main.async {
                 let skeleton = (gas: resultJson?["gas"] as? String, gasPrice: resultJson?["gas_price"] as? String, transaction: resultJson?["tx"] as? String)
                 completion(skeleton, resultError)
             }
         }
     }
-
+    
     func sendSignedTransaction(originalTransaction: String, transactionSignature: String, completion: @escaping ((_ success: Bool, _ transactionHash: String?, _ error: ToshiError?) -> Void)) {
         let params = [
             "tx": originalTransaction,
@@ -103,16 +103,16 @@ class EthereumAPIClient: NSObject {
         ]
         sendSignedTransaction(params: params, completion: completion)
     }
-
+    
     func sendSignedTransaction(signedTransaction: String, completion: @escaping ((_ success: Bool, _ transactionHash: String?, _ error: ToshiError?) -> Void)) {
         let params = [
             "tx": signedTransaction
         ]
         sendSignedTransaction(params: params, completion: completion)
     }
-
+    
     private func sendSignedTransaction(params: [String: String], completion: @escaping ((_ success: Bool, _ transactionHash: String?, _ error: ToshiError?) -> Void)) {
-
+        
         timestamp(activeTeapot) { timestamp, error in
             guard let timestamp = timestamp else {
                 DispatchQueue.main.async {
@@ -120,10 +120,10 @@ class EthereumAPIClient: NSObject {
                 }
                 return
             }
-
+            
             let cereal = Cereal.shared
             let path = "/v1/tx"
-
+            
             guard let data = try? JSONSerialization.data(withJSONObject: params, options: []), let payloadString = String(data: data, encoding: .utf8) else {
                 DLog("Invalid payload, request could not be executed")
                 DispatchQueue.main.async {
@@ -131,18 +131,18 @@ class EthereumAPIClient: NSObject {
                 }
                 return
             }
-
+            
             let hashedPayload = cereal.sha3WithID(string: payloadString)
             let signature = "0x\(cereal.signWithID(message: "POST\n\(path)\n\(timestamp)\n\(hashedPayload)"))"
-
+            
             let headers: [String: String] = [
                 "Token-ID-Address": cereal.address,
                 "Token-Signature": signature,
                 "Token-Timestamp": timestamp
             ]
-
+            
             let json = RequestParameter(params)
-
+            
             self.activeTeapot.post(path, parameters: json, headerFields: headers) { result in
                 DispatchQueue.main.async {
                     switch result {
@@ -158,23 +158,23 @@ class EthereumAPIClient: NSObject {
                             completion(false, nil, ToshiError(withTeapotError: error))
                             return
                         }
-
+                        
                         completion(false, nil, ToshiError(withTeapotError: error, errorDescription: jsonError["message"] as? String))
                     }
                 }
             }
         }
     }
-
+    
     func getBalance(address: String = Cereal.shared.paymentAddress, cachedBalanceCompletion: @escaping BalanceCompletion = { balance, _ in }, fetchedBalanceCompletion: @escaping BalanceCompletion) {
-
+        
         let cachedBalance: NSDecimalNumber = self.cache.object(forKey: EthereumAPIClient.CachedBalanceKey) ?? .zero
         cachedBalanceCompletion(cachedBalance, nil)
-
+        
         self.activeTeapot.get("/v1/balance/\(address)") { [weak self] (result: NetworkResult) in
             var balance: NSDecimalNumber = .zero
             var resultError: ToshiError?
-
+            
             switch result {
             case .success(let json, let response):
                 guard response.statusCode == 200 else {
@@ -191,70 +191,70 @@ class EthereumAPIClient: NSObject {
                     
                     return
                 }
-
+                
                 let unconfirmedBalanceString = json["unconfirmed_balance"] as? String ?? "0"
                 let unconfirmedBalance = NSDecimalNumber(hexadecimalString: unconfirmedBalanceString)
-
+                
                 TokenUser.current?.balance = unconfirmedBalance
                 balance = unconfirmedBalance
-
+                
             case .failure(_, _, let error):
                 resultError = ToshiError(withTeapotError: error)
                 DLog("\(error)")
             }
-
+            
             DispatchQueue.main.async {
                 self?.cache.setObject(balance, forKey: EthereumAPIClient.CachedBalanceKey)
                 fetchedBalanceCompletion(balance, resultError)
             }
         }
     }
-
+    
     @objc func registerForMainNetworkPushNotifications() {
         timestamp(mainTeapot) { timestamp, _ in
             guard let timestamp = timestamp else { return }
-
+            
             self.registerForPushNotifications(timestamp, teapot: self.mainTeapot) { _, _ in }
         }
     }
-
+    
     @objc func registerForSwitchedNetworkPushNotificationsIfNeeded(completion: ((_ success: Bool, _ message: String?) -> Void)? = nil) {
         guard NetworkSwitcher.shared.isDefaultNetworkActive == false else {
             completion?(true, nil)
             return
         }
-
+        
         switchedNetworkTeapot.baseURL = URL(string: NetworkSwitcher.shared.activeNetworkBaseUrl)!
-
+        
         timestamp(switchedNetworkTeapot) { timestamp, _ in
             guard let timestamp = timestamp else { return }
-
+            
             self.registerForPushNotifications(timestamp, teapot: self.switchedNetworkTeapot, completion: completion)
         }
     }
-
+    
     @objc func deregisterFromMainNetworkPushNotifications() {
         timestamp(mainTeapot) { timestamp, _ in
             guard let timestamp = timestamp else { return }
             self.deregisterFromPushNotifications(timestamp, teapot: self.mainTeapot)
         }
     }
-
+    
     func deregisterFromSwitchedNetworkPushNotifications(completion: @escaping ((_ success: Bool, _ message: String?) -> Void) = { (Bool, String) in }) {
-
+        
         timestamp(switchedNetworkTeapot) { timestamp, _ in
             guard let timestamp = timestamp else { return }
             self.deregisterFromPushNotifications(timestamp, teapot: self.switchedNetworkTeapot, completion: completion)
         }
     }
-
+    
     private func timestamp(_ teapot: Teapot, _ completion: @escaping ((_ timestamp: String?, _ error: ToshiError?) -> Void)) {
         teapot.get("/v1/timestamp") { (result: NetworkResult) in
             switch result {
             case .success(let json, _):
                 guard let json = json?.dictionary else { fatalError() }
                 guard let timestamp = json["timestamp"] as? Int else { fatalError("Timestamp should be an integer") }
-
+                
                 completion(String(timestamp), nil)
             case .failure(_, _, let error):
                 completion(nil, ToshiError(withTeapotError: error))
@@ -262,32 +262,32 @@ class EthereumAPIClient: NSObject {
             }
         }
     }
-
+    
     private func registerForPushNotifications(_ timestamp: String, teapot: Teapot, completion: ((_ success: Bool, _ message: String?) -> Void)? = nil) {
         DispatchQueue.main.async {
             guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
-
+            
             let cereal = Cereal.shared
             let path = "/v1/apn/register"
             let address = cereal.address
             let params = ["registration_id": appDelegate.token, "address": cereal.paymentAddress]
-
+            
             guard let data = try? JSONSerialization.data(withJSONObject: params, options: []), let payloadString = String(data: data, encoding: .utf8) else {
                 completion?(false, "Invalid payload, request could not be executed")
                 return
             }
-
+            
             let hashedPayload = cereal.sha3WithID(string: payloadString)
             let signature = "0x\(cereal.signWithID(message: "POST\n\(path)\n\(timestamp)\n\(hashedPayload)"))"
-
+            
             let headerFields: [String: String] = [
                 "Token-ID-Address": address,
                 "Token-Signature": signature,
                 "Token-Timestamp": timestamp
             ]
-
+            
             let json = RequestParameter(params)
-
+            
             teapot.post(path, parameters: json, headerFields: headerFields) { result in
                 switch result {
                 case .success(let json, let response):
@@ -300,50 +300,50 @@ class EthereumAPIClient: NSObject {
                     DispatchQueue.main.async {
                         completion?(false, "json: \(json?.dictionary ?? [String: Any]()) response: \(response), error: \(error)")
                     }
-                }g
+                }
             }
         }
     }
-
+    
     private func deregisterFromPushNotifications(_ timestamp: String, teapot: Teapot, completion: @escaping ((_ success: Bool, _ message: String?) -> Void) = { (Bool, String) in }) {
-
+        
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
-
+        
         let cereal = Cereal.shared
         let address = cereal.address
         let path = "/v1/apn/deregister"
-
+        
         let params = ["registration_id": appDelegate.token, "address": cereal.paymentAddress]
-
+        
         guard let data = try? JSONSerialization.data(withJSONObject: params, options: []), let payloadString = String(data: data, encoding: .utf8) else {
             completion(false, "Invalid payload, request could not be executed")
             return
         }
-
+        
         let hashedPayload = cereal.sha3WithID(string: payloadString)
         let signature = "0x\(cereal.signWithID(message: "POST\n\(path)\n\(timestamp)\n\(hashedPayload)"))"
-
+        
         let headerFields: [String: String] = [
             "Token-ID-Address": address,
             "Token-Signature": signature,
             "Token-Timestamp": timestamp
         ]
-
+        
         let json = RequestParameter(params)
-
-            teapot.post(path, parameters: json, headerFields: headerFields) { result in
-                switch result {
-                case .success(let json, let response):
-                    DLog("\n --- DE-registered from :\(teapot.baseURL)")
-                    DispatchQueue.main.async {
-                        completion(true, "json:\(json?.dictionary ?? [String: Any]()), response: \(response)")
-                    }
-                case .failure(let json, let response, let error):
-                    DLog("\(error)")
-                    DispatchQueue.main.async {
-                        completion(false, "json:\(json?.dictionary ?? [String: Any]()), response: \(response), error: \(error)")
-                    }
+        
+        teapot.post(path, parameters: json, headerFields: headerFields) { result in
+            switch result {
+            case .success(let json, let response):
+                DLog("\n --- DE-registered from :\(teapot.baseURL)")
+                DispatchQueue.main.async {
+                    completion(true, "json:\(json?.dictionary ?? [String: Any]()), response: \(response)")
+                }
+            case .failure(let json, let response, let error):
+                DLog("\(error)")
+                DispatchQueue.main.async {
+                    completion(false, "json:\(json?.dictionary ?? [String: Any]()), response: \(response), error: \(error)")
                 }
             }
+        }
     }
 }
