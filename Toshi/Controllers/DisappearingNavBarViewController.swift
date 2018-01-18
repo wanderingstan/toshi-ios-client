@@ -138,8 +138,12 @@ class DisappearingNavBarViewController: UIViewController, DisappearingBackground
         addScrollableContent(to: contentView)
     }
 
-    /// Called when scrollable content should be programmatically added to the given container view.
-    /// The size of the views added to the container will determine the scrollable area of the scroll view.
+    /// Called when scrollable content should be programmatically added to the given container view, which
+    /// has already been added to the scrollView.
+    ///
+    /// Use autolayout to add views to the container, making sure to pin the bottom of the bottom view to the bottom
+    /// of the container. Autolayout will then automatically figure out the height of the container, and then use
+    /// the container's size as the scrollable content size.
     ///
     /// - Parameter contentView: The content view to add scrollable content to.
     func addScrollableContent(to contentView: UIView) {
