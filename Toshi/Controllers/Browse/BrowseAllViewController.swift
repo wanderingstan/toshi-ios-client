@@ -85,12 +85,14 @@ class BrowseAllViewController: UITableViewController {
     }
 
     override func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
+        dismissSearch()
+
         if let contact = searchResults.element(at: indexPath.row) as? TokenUser {
-            dismissSearch()
             Navigator.push(ProfileViewController(profile: contact))
         } else if let dapp = searchResults.element(at: indexPath.row) as? Dapp {
-            dismissSearch()
             Navigator.push(DappViewController(with: dapp))
+        } else {
+            assertionFailure("Unknown element at row \(indexPath.row)")
         }
     }
 

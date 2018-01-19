@@ -369,12 +369,14 @@ extension BrowseViewController: BrowseCollectionViewCellSelectionDelegate {
     
     func didSelectItem(at indexPath: IndexPath, collectionView: SectionedCollectionView) {
         if let section = items.element(at: collectionView.section) {
+            dismissSearch()
+
             if let user = section.element(at: indexPath.item) as? TokenUser {
-                dismissSearch()
                 Navigator.push(ProfileViewController(profile: user))
             } else if let dapp = section.element(at: indexPath.item) as? Dapp {
-                dismissSearch()
                 Navigator.push(DappViewController(with: dapp))
+            } else {
+                assertionFailure("Unhandled element type at index path \(indexPath)")
             }
         }
     }
