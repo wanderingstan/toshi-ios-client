@@ -203,13 +203,7 @@ class PaymentConfirmationViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelItemTapped))
 
         displayRecipientDetails()
-
-        switch recipientType {
-        case .user:
-            view.backgroundColor = Theme.viewBackgroundColor
-        case .dapp:
-            view.backgroundColor = .clear
-        }
+        view.backgroundColor = Theme.viewBackgroundColor
 
         payButton.showSpinner()
 
