@@ -194,6 +194,8 @@ final class ChatViewController: UIViewController, UINavigationControllerDelegate
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+
         preferLargeTitleIfPossible(false)
 
         isVisible = true
