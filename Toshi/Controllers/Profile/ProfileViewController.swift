@@ -444,11 +444,6 @@ final class ProfileViewController: DisappearingNavBarViewController {
         nameLabel.text = profile.name.isEmpty ? nil : profile.name
         aboutContentLabel.text = profile.about.isEmpty ? nil : profile.about
         locationContentLabel.text = profile.location.isEmpty ? nil : profile.location
-
-        if isBotProfile {
-            aboutContentLabel.text = "Some text about this bot which would look totally different in production."
-        }
-
         usernameLabel.text = profile.displayUsername
         
         if isProfileEditable {

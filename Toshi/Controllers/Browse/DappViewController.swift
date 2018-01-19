@@ -133,12 +133,6 @@ final class DappViewController: DisappearingNavBarViewController {
         navBar.setTitle(dapp.name)
         titleLabel.text = dapp.name
         descriptionLabel.text = dapp.description
-        
-        //TODO: Remove temp for loop
-        for _ in 0..<3 {
-            descriptionLabel.text = descriptionLabel.text! + "\n\n\(dapp.description)"
-        }
-        
         urlLabel.text = dapp.url.absoluteString
         
         AvatarManager.shared.avatar(for: dapp.avatarUrlString, completion: { [weak self] image, _ in
