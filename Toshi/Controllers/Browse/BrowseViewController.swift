@@ -54,6 +54,7 @@ class BrowseViewController: SearchableCollectionController {
     
     private lazy var searchResultView: BrowseSearchResultView = {
         let view = BrowseSearchResultView()
+        view.searchDelegate = self
         view.isHidden = true
         
         return view
@@ -376,5 +377,13 @@ extension BrowseViewController: BrowseCollectionViewCellSelectionDelegate {
                 Navigator.push(DappViewController(with: dapp))
             }
         }
+    }
+}
+
+extension BrowseViewController: SearchSelectionDelegate {
+
+    func didSelectSearchResult(user: TokenUser) {
+        dismissSearch()
+        Navigator.push(ProfileViewController(profile: user))
     }
 }

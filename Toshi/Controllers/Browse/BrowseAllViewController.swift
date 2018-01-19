@@ -86,8 +86,10 @@ class BrowseAllViewController: UITableViewController {
 
     override func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let contact = searchResults.element(at: indexPath.row) as? TokenUser {
+            dismissSearch()
             Navigator.push(ProfileViewController(profile: contact))
         } else if let dapp = searchResults.element(at: indexPath.row) as? Dapp {
+            dismissSearch()
             Navigator.push(DappViewController(with: dapp))
         }
     }
@@ -111,5 +113,11 @@ class BrowseAllViewController: UITableViewController {
         }
 
         return cell
+    }
+
+    private func dismissSearch() {
+        guard let searchController = self.presentedViewController as? UISearchController else { return }
+
+        searchController.dismiss(animated: false, completion: nil)
     }
 }
