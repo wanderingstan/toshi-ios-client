@@ -16,18 +16,72 @@
 import Foundation
 
 struct PaymentViewModel {
-    private(set) var recipientAddress: String?
-    private(set) var value: NSDecimalNumber?
-    private(set) var gasPrice: String?
 
-    mutating func setValue(_ weiValue: NSDecimalNumber) {
-        value = weiValue
-    }
-    mutating func setAddress(_ address: String) {
-        recipientAddress = address
+    var recipientAddress: String? {
+        set {
+            parameters[PaymentParameters.to] = newValue
+        }
+        get {
+            return parameters[PaymentParameters.to] as? String
+        }
     }
 
-    mutating func setGasPrice(_ gasPrice: String?) {
-        self.gasPrice = gasPrice
+    var value: NSDecimalNumber? {
+        set {
+            parameters[PaymentParameters.value] = newValue?.toHexString
+        }
+        get {
+            guard let hexValue = parameters[PaymentParameters.value] as? String else { return nil }
+
+            return NSDecimalNumber(hexadecimalString: hexValue)
+        }
+    }
+
+    var from: String {
+        return Cereal.shared.address
+    }
+
+    private(set) var data: String? {
+        set {
+            parameters[PaymentParameters.data] = newValue
+        }
+        get {
+            return parameters[PaymentParameters.data] as? String
+        }
+    }
+
+    private(set) var gas: String? {
+        set {
+            parameters[PaymentParameters.gas] = newValue
+        }
+        get {
+            return parameters[PaymentParameters.gas] as? String
+        }
+    }
+
+    private(set) var gasPrice: String? {
+        set {
+            parameters[PaymentParameters.gasPrice] = newValue
+        }
+        get {
+            return parameters[PaymentParameters.gasPrice] as? String
+        }
+    }
+
+    private(set) var nonce: String? {
+        set {
+            parameters[PaymentParameters.nonce] = newValue
+        }
+        get {
+            return parameters[PaymentParameters.nonce] as? String
+        }
+    }
+
+    private(set) var parameters: [String: Any]
+    
+    init(parameters: [String: Any]) {
+
+        self.parameters = parameters
+        self.parameters[PaymentParameters.from] = Cereal.shared.paymentAddress
     }
 }

@@ -254,31 +254,31 @@ extension SOFAWebController: WKScriptMessageHandler {
             }
 
             var parameters: [String: Any] = [:]
-            if let from = transaction["from"] {
-                parameters["from"] = from
+            if let from = transaction[PaymentParameters.from] {
+                parameters[PaymentParameters.from] = from
             }
-            if let to = transaction["to"] {
-                parameters["to"] = to
+            if let to = transaction[PaymentParameters.to] {
+                parameters[PaymentParameters.to] = to
             }
-            if let value = transaction["value"] {
-                parameters["value"] = value
+            if let value = transaction[PaymentParameters.value] {
+                parameters[PaymentParameters.value] = value
             } else {
-                parameters["value"] = "0x0"
+                parameters[PaymentParameters.value] = "0x0"
             }
-            if let data = transaction["data"] {
-                parameters["data"] = data
+            if let data = transaction[PaymentParameters.data] {
+                parameters[PaymentParameters.data] = data
             }
-            if let gas = transaction["gas"] {
-                parameters["gas"] = gas
+            if let gas = transaction[PaymentParameters.gas] {
+                parameters[PaymentParameters.gas] = gas
             }
-            if let gasPrice = transaction["gasPrice"] {
-                parameters["gasPrice"] = gasPrice
+            if let gasPrice = transaction[PaymentParameters.gasPrice] {
+                parameters[PaymentParameters.gasPrice] = gasPrice
             }
-            if let nonce = transaction["nonce"] {
-                parameters["nonce"] = nonce
+            if let nonce = transaction[PaymentParameters.nonce] {
+                parameters[PaymentParameters.nonce] = nonce
             }
 
-            if let to = transaction["to"] as? String, let value = parameters["value"] as? String {
+            if let to = transaction[PaymentParameters.to] as? String, let value = parameters[PaymentParameters.value] as? String {
 
                 IDAPIClient.shared.findUserWithPaymentAddress(to, completion: { [weak self] user, _ in
                     let webViewTitle = self?.webView.title
@@ -291,7 +291,7 @@ extension SOFAWebController: WKScriptMessageHandler {
                     var userInfo = UserInfo(address: to, paymentAddress: to, avatarPath: nil, name: webViewTitle, username: to, isLocal: false)
 
                     //we do not have image from a website yet
-                    var dappInfo = DappInfo(url, "", webViewTitle)
+                    let dappInfo = DappInfo(url, "", webViewTitle)
 
                     if let user = user {
                         userInfo.avatarPath = user.avatarPath
@@ -339,12 +339,9 @@ extension SOFAWebController: WKScriptMessageHandler {
     }
 
     private func presentPaymentConfirmation(with messageText: String, parameters: [String: Any], userInfo: UserInfo, dappInfo: DappInfo, callbackId: String) {
-
-        guard let destinationAddress = parameters["to"] as? String, let hexValue = parameters["value"] as? String else { return }
         currentTransactionSignCallbackId = callbackId
 
-        
-        paymentRouter = PaymentRouter(withAddress: destinationAddress, andValue: NSDecimalNumber(hexadecimalString: hexValue), gasPrice: parameters["gasPrice"] as? String, shouldSendSignedTransaction: false, additionalParams: parameters)
+        paymentRouter = PaymentRouter(parameters: parameters, shouldSendSignedTransaction: false)
         paymentRouter?.delegate = self
 
         paymentRouter?.userInfo = userInfo

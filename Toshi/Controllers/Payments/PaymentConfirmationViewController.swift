@@ -31,10 +31,11 @@ class PaymentConfirmationViewController: UIViewController {
     weak var delegate: PaymentConfirmationViewControllerDelegate?
 
     let paymentManager: PaymentManager
-    private var recipientType: RecipientType
-    let shouldSendSignedTransaction: Bool
 
-    private let skeletonParams: [String: Any]?
+    private var recipientType: RecipientType
+    private let shouldSendSignedTransaction: Bool
+
+    private let parameters: [String: Any]
 
     // MARK: - Lazy views
 
@@ -177,13 +178,18 @@ class PaymentConfirmationViewController: UIViewController {
 
     // MARK: - Initialization
 
-    init(withValue value: NSDecimalNumber, andRecipientAddress address: String, gasPrice: String? = nil, recipientType: RecipientType, shouldSendSignedTransaction: Bool = true, skeletonParams: [String: Any]? = nil) {
-        paymentManager = PaymentManager(withValue: value, andPaymentAddress: address, gasPrice: gasPrice, skeletonParams: skeletonParams)
+    init(parameters: [String: Any], recipientType: RecipientType, shouldSendSignedTransaction: Bool = true) {
+        paymentManager = PaymentManager(parameters: parameters)
         self.recipientType = recipientType
-        self.skeletonParams = skeletonParams
         self.shouldSendSignedTransaction = shouldSendSignedTransaction
+        self.parameters = parameters
 
         super.init(nibName: nil, bundle: nil)
+
+        guard let address = parameters[PaymentParameters.to] as? String, EthereumAddress.validate(address) else {
+            assertionFailure("Invalid payment address on Payment confirmation")
+            return
+        }
 
         fetchUserWithCurrentPaymentAddressIfNeeded(address)
     }
@@ -435,6 +441,7 @@ class PaymentConfirmationViewController: UIViewController {
     // MARK: - Action Targets
 
     @objc func cancelItemTapped() {
+        self.dismiss(animated: true, completion: nil)
         delegate?.paymentConfirmationViewControllerDidCancel(on: self)
     }
 

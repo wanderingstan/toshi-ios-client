@@ -263,7 +263,7 @@ extension TabBarController: ScannerViewControllerDelegate {
 
     private func proceedToPayment(address: String, weiValue: String?, confirmationText: String) {
         let userInfo = UserInfo(address: address, paymentAddress: address, avatarPath: nil, name: nil, username: address, isLocal: false)
-        var parameters = ["from": Cereal.shared.paymentAddress, "to": address]
+        var parameters = [PaymentParameters.from: Cereal.shared.paymentAddress, PaymentParameters.to: address]
         parameters["value"] = weiValue
 
         proceedToPayment(userInfo: userInfo, parameters: parameters, confirmationText: confirmationText)
@@ -272,8 +272,9 @@ extension TabBarController: ScannerViewControllerDelegate {
     private func proceedToPayment(username: String, weiValue: String?, confirmationText: String) {
         idAPIClient.retrieveUser(username: username) { [weak self] contact in
             if let contact = contact, let validWeiValue = weiValue {
-                var parameters = ["from": Cereal.shared.paymentAddress, "to": contact.paymentAddress]
-                parameters["value"] = validWeiValue
+                let parameters = [PaymentParameters.from: Cereal.shared.paymentAddress,
+                                  PaymentParameters.to: contact.paymentAddress,
+                                  PaymentParameters.value: validWeiValue]
 
                 self?.proceedToPayment(userInfo: contact.userInfo, parameters: parameters, confirmationText: confirmationText)
             } else {
@@ -286,12 +287,12 @@ extension TabBarController: ScannerViewControllerDelegate {
 
         self.paidUserInfo = userInfo
 
-        if let hexValue = parameters["value"] as? String, let destinationAddress = parameters["to"] as? String, let scannerController = self.scannerController as? ScannerController {
+        if let scannerController = self.scannerController as? ScannerController {
             scannerController.setStatusBarHidden(true)
 
             SoundPlayer.playSound(type: .scanned)
 
-            self.paymentRouter = PaymentRouter(withAddress: destinationAddress, andValue: NSDecimalNumber(hexadecimalString: hexValue))
+            self.paymentRouter = PaymentRouter(parameters: parameters)
             self.paymentRouter?.delegate = self
             self.paymentRouter?.present()
 

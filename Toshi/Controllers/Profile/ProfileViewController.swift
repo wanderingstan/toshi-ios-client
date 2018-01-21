@@ -511,7 +511,7 @@ class ProfileViewController: UIViewController {
     }
     
     @objc private func didTapPayButton() {
-        self.paymentRouter = PaymentRouter(withAddress: profile.paymentAddress)
+        self.paymentRouter = PaymentRouter(parameters: [PaymentParameters.to: profile.paymentAddress])
         self.paymentRouter?.delegate = self
         self.paymentRouter?.userInfo = profile.userInfo
         self.paymentRouter?.present()

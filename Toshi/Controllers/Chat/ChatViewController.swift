@@ -483,9 +483,9 @@ final class ChatViewController: UIViewController, UINavigationControllerDelegate
         guard EthereumAddress.validate(destinationAddress) else { return nil }
 
         let parameters: [String: Any] = [
-            "from": Cereal.shared.paymentAddress,
-            "to": destinationAddress,
-            "value": paymentRequest.value
+            PaymentParameters.from: Cereal.shared.paymentAddress,
+            PaymentParameters.to: destinationAddress,
+            PaymentParameters.value: paymentRequest.value.toHexString
         ]
 
         return parameters
@@ -689,9 +689,19 @@ extension ChatViewController: UITableViewDataSource {
         return .single
     }
 
-    private func presentPaymentRouter(address: String?, value: NSDecimalNumber? = nil) {
+    private func presentPaymentRouter(address: String, value: NSDecimalNumber? = nil) {
 
-        self.paymentRouter = PaymentRouter(withAddress: address, andValue: value)
+        var parameters = ["to": address]
+
+        if let value = value {
+            parameters["value"] = value.toHexString
+        }
+
+        presentPaymentRouter(for: parameters)
+    }
+
+    private func presentPaymentRouter(for parameters: [String: Any]) {
+        self.paymentRouter = PaymentRouter(parameters: parameters)
         self.paymentRouter?.delegate = self
         self.paymentRouter?.userInfo = self.thread.recipient()?.userInfo
         self.paymentRouter?.present()
@@ -735,22 +745,10 @@ extension ChatViewController: MessagesPaymentCellDelegate {
 
     func approvePayment(for cell: MessagesPaymentCell) {
         guard let indexPath = self.tableView.indexPath(for: cell) else { return }
-        guard let message = self.viewModel.messageModels.element(at: indexPath.row) else { return }
-
-        var messageText: String
-        if let fiat = message.fiatValueString, let eth = message.ethereumValueString {
-            messageText = String(format: Localized("payment_request_confirmation_warning_message"), fiat, eth, self.thread.name())
-        } else {
-            messageText = String(format: Localized("payment_request_confirmation_warning_message_fallback"), self.thread.name())
-        }
-
-        guard let parameters = transactionParameter(for: indexPath), let value = parameters["value"] as? NSDecimalNumber else { return }
+        guard let parameters = transactionParameter(for: indexPath) else { return }
 
         paymentRequestActiveCell = cell
-
-        viewModel.interactor.retrieveRecipientAddress { [weak self] address in
-            self?.presentPaymentRouter(address: address, value: value)
-        }
+        presentPaymentRouter(for: parameters)
     }
 
     func declinePayment(for cell: MessagesPaymentCell) {
@@ -890,7 +888,17 @@ extension ChatViewController: ChatFloatingHeaderViewDelegate {
         view.layoutIfNeeded()
         textInputView.inputField.resignFirstResponder()
 
+        showActivityIndicator()
+
         viewModel.interactor.retrieveRecipientAddress { [weak self] address in
+
+            self?.hideActivityIndicator()
+
+            guard let address = address else {
+                assertionFailure("Can't retrieve chat recipient's payment address, which should be definitely possible")
+                return
+            }
+            
             self?.presentPaymentRouter(address: address)
         }
     }

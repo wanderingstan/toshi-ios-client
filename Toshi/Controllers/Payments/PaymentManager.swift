@@ -3,41 +3,35 @@ import UIKit
 
 typealias PaymentInfo = (fiatString: String, estimatedFeesString: String, totalFiatString: String, totalEthereumString: String, balanceString: String, sufficientBalance: Bool)
 
+struct PaymentParameters {
+    static let from = "from"
+    static let to = "to"
+    static let value = "value"
+    static let data = "data"
+    static let gas = "gas"
+    static let gasPrice = "gasPrice"
+    static let nonce = "nonce"
+}
+
 class PaymentManager {
 
     private(set) var transaction: String?
 
-    let value: NSDecimalNumber
-    let paymentAddress: String
-    let gasPrice: String?
-    let skeletonParams: [String: Any]?
+    var value: NSDecimalNumber {
+        guard let valueString = parameters["value"] as? String else { return .zero }
 
-    lazy var parameters: [String: Any] = {
+        return NSDecimalNumber(hexadecimalString: valueString)
+    }
 
-        var params = [
-            "from": Cereal.shared.paymentAddress,
-            "to": paymentAddress,
-            "value": value.toHexString
-        ]
+    var parameters: [String: Any]
 
-        if let gasPrice = self.gasPrice {
-            params["gasPrice"] = gasPrice
-        }
-
-        return params
-    }()
-
-    init(withValue value: NSDecimalNumber, andPaymentAddress address: String, gasPrice: String? = nil, skeletonParams: [String: Any]?) {
-        self.value = value
-        self.paymentAddress = address
-        self.gasPrice = gasPrice
-        self.skeletonParams = skeletonParams
+    init(parameters: [String: Any]) {
+        self.parameters = parameters
     }
 
     func fetchPaymentInfo(completion: @escaping ((_ paymentInfo: PaymentInfo) -> Void)) {
-        var targetParams = skeletonParams ?? parameters
 
-        EthereumAPIClient.shared.transactionSkeleton(for: targetParams) { [weak self] skeleton, error in
+        EthereumAPIClient.shared.transactionSkeleton(for: parameters) { [weak self] skeleton, error in
             guard error == nil else {
                 // Handle error
                 return
@@ -47,7 +41,6 @@ class PaymentManager {
 
             weakSelf.transaction = transaction
 
-
             let gasPriceValue = NSDecimalNumber(hexadecimalString: gasPrice)
             let gasValue = NSDecimalNumber(hexadecimalString: gas)
 
@@ -55,7 +48,6 @@ class PaymentManager {
             let decimalNumberFee = NSDecimalNumber(decimal: fee)
 
             let exchangeRate = ExchangeRateClient.exchangeRate
-
 
             //WARNING: we need to test these values that the correspond with each other
             let fiatString = EthereumConverter.fiatValueStringWithCode(forWei: weakSelf.value, exchangeRate: exchangeRate)
