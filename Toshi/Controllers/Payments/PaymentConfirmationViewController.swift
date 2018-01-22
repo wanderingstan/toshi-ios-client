@@ -452,9 +452,12 @@ class PaymentConfirmationViewController: UIViewController {
 
         guard bottomOfReceiptConstraint?.constant != targetConstraintConstant else { /* already where we want it to be */ return }
 
-        bottomConstraint.constant = targetConstraintConstant
+        // Execute any pending layout operations before the one we want to animate
+        view.layoutIfNeeded()
+
         let options: UIViewAnimationOptions = showing ? [.curveEaseOut] : [.curveEaseIn]
         let duration = animated ? 0.4 : 0
+        bottomConstraint.constant = targetConstraintConstant
 
         UIView.animate(withDuration: duration, delay: 0, options: options, animations: {
             self.view.layoutIfNeeded()
