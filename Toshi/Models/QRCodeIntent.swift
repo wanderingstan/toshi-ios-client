@@ -11,7 +11,6 @@ enum QRCodeIntent {
     private static let paymentRequestPattern = "^https?://[^\\.]+.toshi.org/pay/@([^/\\?]+)"
 
     init?(result: String) {
-        let result = "iban:XE420ENF06QHAD2B0729XZJ1OU26UVM0TSN?amount=0.001"
         if let address = EthereumAddress(raw: result) {
             if let metadata = PaymentRequestMetadata(with: result) {
                 self = .paymentRequest(weiValue: metadata.weiValue, address: address.normalized, username: nil, memo: metadata.memo)
