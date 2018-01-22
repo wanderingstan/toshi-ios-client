@@ -275,7 +275,11 @@ class PaymentConfirmationViewController: UIViewController {
             guard !hasLaidOutBefore, bottomOfReceiptConstraint != nil else { return }
 
             hasLaidOutBefore = true
+
+            // First, shove the receipt offscreen non-animated so the user can't see it.
             setReceiptShowing(false, animated: false)
+
+            // Then, start animating it back in. 
             setReceiptShowing(true)
         }
     }
