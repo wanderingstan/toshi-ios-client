@@ -446,6 +446,7 @@ class PaymentConfirmationViewController: UIViewController {
     }
 
     @objc func didTapPayButton() {
+        payButton.showSpinner()
         guard shouldSendSignedTransaction else {
             dismiss(animated: true, completion: {
                 self.delegate?.paymentConfirmationViewControllerFinished(on: self, parameters: self.paymentManager.parameters, transactionHash: "", error: nil)
