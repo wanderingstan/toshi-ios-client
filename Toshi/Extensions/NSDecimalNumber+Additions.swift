@@ -77,5 +77,17 @@ extension NSDecimalNumber {
                 return false
         }
     }
+
+    //WARNING: this method needs muchos testing!
+    func isGreaterThan(value: NSDecimalNumber) -> Bool {
+        let result = compare(value)
+
+        switch result {
+            case .orderedDescending:
+                return true
+            case .orderedAscending, .orderedSame:
+                return false
+        }
+    }
 }
 
