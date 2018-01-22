@@ -83,6 +83,7 @@ extension UIStackView {
     
     /// Backwards compatibile way to add custom spacing between views of a stack view
     /// NOTE: When iOS 11 support is dropped, this should be removed and `setCustomSpacing` should be used directly.
+    /// ALSO NOTE: On iOS 11, this doesn't work if there's no view below the view where you've added the custom spacing. Use `addSpacerView(with:after:)` instead.
     ///
     /// - Parameters:
     ///   - spacing: The amount of spacing to add.
@@ -91,28 +92,41 @@ extension UIStackView {
         if #available(iOS 11, *) {
             setCustomSpacing(spacing, after: view)
         } else {
-            let spacerView = UIView()
-            spacerView.tag = UIStackView.spacerTag
-            spacerView.backgroundColor = .clear
-            
             guard let indexOfViewToInsertAfter = self.arrangedSubviews.index(of: view) else {
                 assertionFailure("You need to insert after one of the arranged subviews of this stack view!")
                 return
             }
             
-            insertArrangedSubview(spacerView, at: (indexOfViewToInsertAfter + 1))
-            spacerView.setContentCompressionResistancePriority(.required, for: axis)
+            addSpacerView(with: spacing, after: indexOfViewToInsertAfter)
+        }
+    }
 
-            switch axis {
-            case .vertical:
-                spacerView.height(spacing)
-                spacerView.left(to: self)
-                spacerView.right(to: self)
-            case .horizontal:
-                spacerView.width(spacing)
-                spacerView.top(to: self)
-                spacerView.bottom(to: self)
-            }
+    /// Inserts or adds a spacer view of the given size. Note that this should be used for bottom spacing - adding custom spacing in iOS 11 only works if there is a view below where you've added the custom spacing.
+    ///
+    /// - Parameters:
+    ///   - spacing: The amount of spacing to add.
+    ///   - indexOfViewToInsertAfter: [optional] The index to insert the view after, or nil to just add to the end. Defaults to nil
+    func addSpacerView(with spacing: CGFloat, after indexOfViewToInsertAfter: Int? = nil) {
+        let spacerView = UIView()
+        spacerView.tag = UIStackView.spacerTag
+        spacerView.backgroundColor = .clear
+        spacerView.setContentCompressionResistancePriority(.required, for: axis)
+
+        if let index = indexOfViewToInsertAfter {
+            insertArrangedSubview(spacerView, at: (index + 1))
+        } else {
+            addArrangedSubview(spacerView)
+        }
+
+        switch axis {
+        case .vertical:
+            spacerView.height(spacing)
+            spacerView.left(to: self)
+            spacerView.right(to: self)
+        case .horizontal:
+            spacerView.width(spacing)
+            spacerView.top(to: self)
+            spacerView.bottom(to: self)
         }
     }
 }

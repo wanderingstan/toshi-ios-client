@@ -1,28 +1,35 @@
+// Copyright (c) 2018 Token Browser, Inc
 //
-//  DappViewController.swift
-//  Debug
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  Created by Ellen Shapiro (Work) on 12/19/17.
-//  Copyright © 2017 Bakken&Baeck. All rights reserved.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import SweetUIKit
 import UIKit
 import TinyConstraints
 
-final class DappViewController: UIViewController {
+final class DappViewController: DisappearingNavBarViewController {
     
     private let dapp: Dapp
     
-    private let avatarHeight: CGFloat = 60
-    
-    // MARK: Normal Views
+    // MARK: Views
     
     private lazy var avatarImageView = AvatarImageView()
     
-    private lazy var mainLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.font = Theme.preferredTitle2()
+        label.font = Theme.preferredDisplayName()
+        label.textAlignment = .center
+        
         return label
     }()
     
@@ -40,7 +47,7 @@ final class DappViewController: UIViewController {
     }()
     
     private lazy var enterButton: ActionButton = {
-        let button = ActionButton(margin: 30)
+        let button = ActionButton(margin: .defaultMargin)
         button.title = Localized("dapp_button_enter")
         button.addTarget(self,
                          action: #selector(didTapEnterButton(_:)),
@@ -49,39 +56,15 @@ final class DappViewController: UIViewController {
         return button
     }()
     
-    // MARK: StackViews
-    
-    private lazy var headerStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .horizontal
-        stackView.spacing = 16
-        stackView.alignment = .center
-        
-        stackView.addArrangedSubview(avatarImageView)
-        
-        avatarImageView.height(avatarHeight)
-        avatarImageView.width(avatarHeight)
-        
-        stackView.addArrangedSubview(mainLabel)
-        
-        return stackView
-    }()
-    
-    private lazy var primaryStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .vertical
-        stackView.spacing = 16
-        
-        stackView.addArrangedSubview(headerStackView)
-        stackView.addArrangedSubview(descriptionLabel)
-        stackView.addArrangedSubview(urlLabel)
-        stackView.addArrangedSubview(enterButton)
+    // MARK: Overridden Superclass Properties
 
-        enterButton.heightConstraint.constant = 44
-        
-        return stackView
-    }()
+    override var backgroundTriggerView: UIView {
+        return avatarImageView
+    }
+
+    override var titleTriggerView: UIView {
+        return titleLabel
+    }
     
     // MARK: - Initialization
     
@@ -100,29 +83,55 @@ final class DappViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.addSubview(primaryStackView)
-        
-        let topAnchor: NSLayoutYAxisAnchor
-
-        if #available(iOS 11.0, *) {
-            topAnchor = view.safeAreaLayoutGuide.topAnchor
-        } else {
-            topAnchor = topLayoutGuide.bottomAnchor
-        }
-        
-        primaryStackView.top(to: view, topAnchor, offset: 16)
-
-        primaryStackView.leftToSuperview(offset: 16)
-        primaryStackView.rightToSuperview(offset: 16)
-    
         configure(for: dapp)
+    }
+    
+    // MARK: - View setup
+
+    override func addScrollableContent(to contentView: UIView) {
+        let spacer = addTopSpacer(to: contentView)
+        setupPrimaryStackView(in: contentView, below: spacer)
+    }
+    
+    private func setupPrimaryStackView(in containerView: UIView, below viewToPinToBottomOf: UIView) {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.alignment = .center
+        stackView.axis = .vertical
+        
+        let margin = CGFloat.defaultMargin
+        
+        containerView.addSubview(stackView)
+        stackView.topToBottom(of: viewToPinToBottomOf)
+        stackView.leftToSuperview(offset: margin)
+        stackView.rightToSuperview(offset: margin)
+        stackView.bottomToSuperview()
+        
+        stackView.addWithCenterConstraint(view: avatarImageView)
+        avatarImageView.height(.defaultAvatarHeight)
+        avatarImageView.width(.defaultAvatarHeight)
+        stackView.addSpacing(margin, after: avatarImageView)
+
+        stackView.addWithDefaultConstraints(view: titleLabel)
+        stackView.addSpacing(.giantInterItemSpacing, after: titleLabel)
+        
+        stackView.addWithDefaultConstraints(view: descriptionLabel)
+        stackView.addSpacing(.mediumInterItemSpacing, after: descriptionLabel)
+        
+        stackView.addWithDefaultConstraints(view: urlLabel)
+        stackView.addSpacing(.largeInterItemSpacing, after: urlLabel)
+        
+        stackView.addWithDefaultConstraints(view: enterButton, margin: margin)
+        enterButton.heightConstraint.constant = .defaultButtonHeight
+        
+        stackView.addSpacerView(with: .largeInterItemSpacing)
     }
     
     // MARK: - Configuration
     
     private func configure(for dapp: Dapp) {
-        title = dapp.name
-        mainLabel.text = dapp.name
+        navBar.setTitle(dapp.name)
+        titleLabel.text = dapp.name
         descriptionLabel.text = dapp.description
         urlLabel.text = dapp.url.absoluteString
         
@@ -138,5 +147,6 @@ final class DappViewController: UIViewController {
         sofaWebController.load(url: dapp.url)
         
         navigationController?.pushViewController(sofaWebController, animated: true)
+        preferLargeTitleIfPossible(false)
     }
 }

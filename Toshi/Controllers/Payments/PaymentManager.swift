@@ -3,7 +3,7 @@ import UIKit
 
 typealias PaymentInfo = (fiatString: String, estimatedFeesString: String, totalFiatString: String, totalEthereumString: String, balanceString: String, sufficientBalance: Bool)
 
-struct PaymentParameters {
+enum PaymentParameters {
     static let from = "from"
     static let to = "to"
     static let value = "value"

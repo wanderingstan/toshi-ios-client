@@ -46,8 +46,6 @@ class ReceiptView: UIStackView {
         view.textAlignment = .right
         view.adjustsFontForContentSizeCategory = true
 
-        view.text = "Just testing 193819283 ETH"
-
         return view
     }()
 
