@@ -279,7 +279,7 @@ class PaymentConfirmationViewController: UIViewController {
             // First, shove the receipt offscreen non-animated so the user can't see it.
             setReceiptShowing(false, animated: false)
 
-            // Then, start animating it back in. 
+            // Then, start animating it back in.
             setReceiptShowing(true)
         }
     }
@@ -448,7 +448,7 @@ class PaymentConfirmationViewController: UIViewController {
     private func setReceiptShowing(_ showing: Bool, animated: Bool = true, completion: (() -> Void)? = nil) {
         guard let bottomConstraint = bottomOfReceiptConstraint else { /* nothing to adjust yet */ return }
 
-        let targetConstraintConstant: CGFloat = showing ? .largeInterItemSpacing : view.frame.height
+        let targetConstraintConstant: CGFloat = showing ? -.largeInterItemSpacing : view.frame.height
 
         guard bottomOfReceiptConstraint?.constant != targetConstraintConstant else { /* already where we want it to be */ return }
 
