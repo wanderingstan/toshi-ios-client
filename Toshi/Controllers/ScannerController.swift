@@ -53,106 +53,11 @@ class ScannerController: ScannerViewController {
     override func setupToolbarItems() {
         toolbar.setItems([self.cancelItem], animated: true)
     }
-
-    func approvePayment(with parameters: [String: Any], userInfo: UserInfo, transaction: String?, error: ToshiError?) {
-        isStatusBarHidden = false
-        guard !userInfo.isLocal else {
-            if let tabbarController = self.presentingViewController as? TabBarController {
-                tabbarController.openPaymentMessage(to: userInfo.address, parameters: parameters, transaction: transaction)
-            }
-
-            return
-        }
-
-        showActivityIndicator()
-
-        guard let transaction = transaction else {
-                self.hideActivityIndicator()
-                self.presentPaymentError(withErrorMessage: error?.localizedDescription ?? ToshiError.genericError.description)
-                self.startScanning()
-
-                return
-        }
-
-        let signedTransaction = self.createSignedTransaction(from: transaction)
-
-        sendTransaction(originalTransaction: transaction, signedTransaction: signedTransaction)
-    }
 }
 
 extension ScannerController: ActivityIndicating {
 
     var activityIndicator: UIActivityIndicatorView {
         return activityView
-    }
-}
-
-extension ScannerController: PaymentPresentable {
-
-    func setStatusBarHidden(_: Bool) {
-        isStatusBarHidden = true
-        setNeedsStatusBarAppearanceUpdate()
-    }
-
-    func paymentFailed() {
-        startScanning()
-        isStatusBarHidden = false
-        startScanning()
-    }
-
-    func paymentDeclined() {
-        isStatusBarHidden = false
-        startScanning()
-    }
-
-    func paymentApproved(with parameters: [String: Any], userInfo: UserInfo) {
-        isStatusBarHidden = false
-        guard !userInfo.isLocal else {
-            if let tabbarController = self.presentingViewController as? TabBarController {
-                // we do not use that alert view currently, need to adjust unsigned tramsaction here, pass nil now
-                tabbarController.openPaymentMessage(to: userInfo.address, parameters: parameters, transaction: nil)
-            }
-
-            return
-        }
-
-        showActivityIndicator()
-
-        EthereumAPIClient.shared.createUnsignedTransaction(parameters: parameters) { [weak self] transaction, error in
-            
-            guard
-                let transaction = transaction,
-                let signedTransaction = self?.createSignedTransaction(from: transaction) else {
-                    self?.hideActivityIndicator()
-                    self?.presentPaymentError(withErrorMessage: error?.localizedDescription ?? ToshiError.genericError.description)
-                    self?.startScanning()
-
-                    return
-            }
-
-            self?.sendTransaction(originalTransaction: transaction, signedTransaction: signedTransaction)
-        }
-    }
-    
-    private func createSignedTransaction(from unsignedTransaction: String) -> String {
-        return "0x\(Cereal.shared.signWithWallet(hex: unsignedTransaction))"
-    }
-    
-    private func sendTransaction(originalTransaction: String, signedTransaction: String) {
-        EthereumAPIClient.shared.sendSignedTransaction(originalTransaction: originalTransaction, transactionSignature: signedTransaction) { [weak self] success, _, error in
-            
-            self?.hideActivityIndicator()
-            
-            guard success else {
-                self?.presentPaymentError(withErrorMessage: error?.description ?? ToshiError.genericError.description)
-                self?.startScanning()
-
-                return
-            }
-            
-            self?.presentSuccessAlert { [weak self] _ in
-                self?.startScanning()
-            }
-        }
     }
 }

@@ -288,7 +288,7 @@ extension TabBarController: ScannerViewControllerDelegate {
         self.paidUserInfo = userInfo
 
         if let scannerController = self.scannerController as? ScannerController {
-            scannerController.setStatusBarHidden(true)
+//            scannerController.setStatusBarHidden(true)
 
             SoundPlayer.playSound(type: .scanned)
 
@@ -329,11 +329,7 @@ extension TabBarController: PaymentRouterDelegate {
             return
         }
 
-        if let scannerController = self.scannerController as? ScannerController {
-            scannerController.approvePayment(with: parameters, userInfo: userInfo, transaction: transactionHash, error: error)
-        } else {
-            scannerController.startScanning()
-        }
+        scannerController.startScanning()
     }
 }
 

@@ -419,13 +419,3 @@ extension SOFAWebController: PaymentRouterDelegate {
 struct SOFAResponseConstants {
     static let skeletonErrorJSON = "{\\\"error\\\": \\\"Error constructing tx skeleton\\\", \\\"result\\\": null}"
 }
-
-extension SOFAWebController: PaymentPresentable {
-    func paymentApproved(with parameters: [String: Any], userInfo _: UserInfo) {
-        //we do not use this currently
-    }
-
-    func paymentDeclined() {
-        //we dnt use this currently
-    }
-}

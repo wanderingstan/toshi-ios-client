@@ -35,6 +35,7 @@ struct Action {
 }
 
 class AlertController: ModalPresentable {
+    static let contentWidth: CGFloat = 310
 
     var customContentView: UIView? {
         didSet {
@@ -108,7 +109,7 @@ class AlertController: ModalPresentable {
 
         visualEffectView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         visualEffectView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        visualEffectView.widthAnchor.constraint(equalToConstant: PaymentConfirmationController.contentWidth).isActive = true
+        visualEffectView.widthAnchor.constraint(equalToConstant: AlertController.contentWidth).isActive = true
 
         background.addGestureRecognizer(tapGesture)
     }
