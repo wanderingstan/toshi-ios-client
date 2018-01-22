@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import Foundation
+import UIKit
 
 protocol PaymentRouterDelegate: class {
     func paymentRouterDidCancel(paymentRouter: PaymentRouter)
@@ -117,9 +117,17 @@ extension PaymentRouter: PaymentConfirmationViewControllerDelegate {
 
     func paymentConfirmationViewControllerFinished(on controller: PaymentConfirmationViewController, parameters: [String: Any], transactionHash: String?, error: ToshiError?) {
 
-        if let paymentNavigationController = Navigator.rootViewController as? PaymentNavigationController{
-            paymentNavigationController.dismiss(animated: true)
-        }
+        guard let tabbarController = Navigator.tabbarController else { return }
+        guard let selectedNavigationController = tabbarController.selectedViewController as? UINavigationController else { return }
+
+        guard let firstPaymentPresentedController = selectedNavigationController.presentedViewController else { return }
+
+        // Top view controller is alway last one from payment related stack, important to dismiss without animation
+        Navigator.topViewController?.dismiss(animated: false, completion: {
+            // First present controller in the stack is first in payment related flow, the very root payment related navigation controller which is presented
+            // dismissing it - it last step
+            firstPaymentPresentedController.dismiss(animated: true, completion: nil)
+        })
 
         self.delegate?.paymentRouterDidSucceedPayment(self, parameters: parameters, transactionHash: transactionHash, unsignedTransaction: controller.originalUnsignedTransaction, error: error)
     }
