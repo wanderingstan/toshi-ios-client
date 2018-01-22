@@ -13,11 +13,7 @@ class PaymentAddressController: UIViewController {
 
     private var paymentAddress: String? {
         didSet {
-            if let address = paymentAddress, EthereumAddress.validate(address) {
-                navigationItem.rightBarButtonItem?.isEnabled = true
-            } else {
-                navigationItem.rightBarButtonItem?.isEnabled = false
-            }
+          validate(paymentAddress)
         }
     }
 
@@ -62,12 +58,24 @@ class PaymentAddressController: UIViewController {
         return controller
     }()
 
+    @discardableResult private func validate(_ address: String?) -> Bool {
+        let isValid: Bool
+        if let address = address, EthereumAddress.validate(address) {
+            isValid = true
+        } else {
+            isValid = false
+        }
+
+        navigationItem.rightBarButtonItem?.isEnabled = isValid
+        return isValid
+    }
+
     init(with valueInWei: NSDecimalNumber) {
         self.valueInWei = valueInWei
         super.init(nibName: nil, bundle: nil)
 
         navigationItem.backBarButtonItem = UIBarButtonItem.back
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(nextBarButtonTapped(_:)))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: Localized("payment_next_button"), style: .plain, target: self, action: #selector(nextBarButtonTapped(_:)))
         navigationItem.rightBarButtonItem?.isEnabled = false
     }
 
@@ -169,16 +177,17 @@ extension PaymentAddressController: ScannerViewControllerDelegate {
 
 extension PaymentAddressController: PaymentAddressInputDelegate {
 
-
     func didRequestScanner() {
         Navigator.presentModally(scannerController)
     }
 
     func didRequestSendPayment() {
-        goToConfirmation()
+        if validate(addressInputView.addressTextField.text) {
+            goToConfirmation()
+        }
     }
 
-    func didChangeAddress(to address: String?) {
-      paymentAddress = address
+    func didChangeAddress() {
+        paymentAddress = addressInputView.addressTextField.text
     }
 }
