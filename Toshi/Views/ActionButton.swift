@@ -138,7 +138,7 @@ class ActionButton: UIControl {
         activityIndicator.activityIndicatorViewStyle = .white
         activityIndicator.alpha = 0
 
-        return activityIndicator 
+        return activityIndicator
     }()
 
     lazy var heightConstraint: NSLayoutConstraint = {
