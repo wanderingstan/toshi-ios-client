@@ -453,6 +453,8 @@ class PaymentConfirmationViewController: UIViewController {
         paymentManager.sendPayment { [weak self] error, transactionHash in
             guard let weakSelf = self else { return }
 
+            weakSelf.payButton.hideSpinner()
+
             guard error == nil else {
                 let alert = UIAlertController(title: Localized("transaction_error_message"), message: (error?.description ?? ToshiError.genericError.description), preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: Localized("alert-ok-action-title"), style: .default, handler: { _ in
