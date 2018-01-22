@@ -158,7 +158,7 @@ final class ChatInteractor: NSObject {
                 return
             }
             
-            guard let value = parameters["value"] as? String else { return }
+            guard let value = parameters[PaymentParameters.value] as? String else { return }
 
             let payment = SofaPayment(txHash: txHash, valueHex: value)
             self?.sendMessage(sofaWrapper: payment)

@@ -41,7 +41,7 @@ extension PaymentPresentable where Self: UIViewController {
 
     func displayPaymentConfirmation(userInfo: UserInfo, parameters: [String: Any]) {
 
-        guard let valueString = parameters["value"] as? String else { return }
+        guard let valueString = parameters[PaymentParameters.value] as? String else { return }
 
         let paymentConfirmationController = PaymentConfirmationController(userInfo: userInfo, value: NSDecimalNumber(hexadecimalString: valueString))
 

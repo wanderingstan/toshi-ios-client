@@ -264,7 +264,7 @@ extension TabBarController: ScannerViewControllerDelegate {
     private func proceedToPayment(address: String, weiValue: String?, confirmationText: String) {
         let userInfo = UserInfo(address: address, paymentAddress: address, avatarPath: nil, name: nil, username: address, isLocal: false)
         var parameters = [PaymentParameters.from: Cereal.shared.paymentAddress, PaymentParameters.to: address]
-        parameters["value"] = weiValue
+        parameters[PaymentParameters.value] = weiValue
 
         proceedToPayment(userInfo: userInfo, parameters: parameters, confirmationText: confirmationText)
     }

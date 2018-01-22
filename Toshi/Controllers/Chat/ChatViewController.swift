@@ -691,10 +691,10 @@ extension ChatViewController: UITableViewDataSource {
 
     private func presentPaymentRouter(address: String, value: NSDecimalNumber? = nil) {
 
-        var parameters = ["to": address]
+        var parameters = [PaymentParameters.to: address]
 
         if let value = value {
-            parameters["value"] = value.toHexString
+            parameters[PaymentParameters.value] = value.toHexString
         }
 
         presentPaymentRouter(for: parameters)
@@ -926,7 +926,7 @@ extension ChatViewController: PaymentRouterDelegate {
             adjustToPaymentState(.approved, at: indexPath)
         }
 
-        if let txHash = transactionHash, let value = parameters["value"] as? String {
+        if let txHash = transactionHash, let value = parameters[PaymentParameters.value] as? String {
             //send payment message
             
             let payment = SofaPayment(txHash: txHash, valueHex: value)

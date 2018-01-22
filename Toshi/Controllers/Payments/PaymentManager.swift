@@ -18,7 +18,7 @@ class PaymentManager {
     private(set) var transaction: String?
 
     var value: NSDecimalNumber {
-        guard let valueString = parameters["value"] as? String else { return .zero }
+        guard let valueString = parameters[PaymentParameters.value] as? String else { return .zero }
 
         return NSDecimalNumber(hexadecimalString: valueString)
     }
@@ -73,7 +73,7 @@ class PaymentManager {
     func sendPayment(completion: @escaping ((_ error: ToshiError?, _ transactionHash: String?) -> Void)) {
         guard let transaction = transaction else { return }
         let signedTransaction = "0x\(Cereal.shared.signWithWallet(hex: transaction))"
-        
+
         EthereumAPIClient.shared.sendSignedTransaction(originalTransaction: transaction, transactionSignature: signedTransaction) { success, transactionHash, error in
             completion(error, transactionHash)
         }
