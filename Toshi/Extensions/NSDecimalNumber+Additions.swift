@@ -67,10 +67,15 @@ extension NSDecimalNumber {
     }
 
     //WARNING: this method needs muchos testing!
-    func isGreaterOrEqualThen(value: NSDecimalNumber) -> Bool {
+    func isGreaterOrEqualThan(value: NSDecimalNumber) -> Bool {
         let result = compare(value)
 
-        return (result == .orderedAscending) ? false : true
+        switch result {
+            case .orderedDescending, .orderedSame:
+                return true
+            case .orderedAscending:
+                return false
+        }
     }
 }
 

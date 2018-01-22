@@ -62,7 +62,7 @@ class PaymentManager {
                 //WARNING: What to do when we have an error here?
 
                 let balanceString = EthereumConverter.fiatValueStringWithCode(forWei: fetchedBalance, exchangeRate: ExchangeRateClient.exchangeRate)
-                let sufficientBalance = fetchedBalance.isGreaterOrEqualThen(value: totalWei)
+                let sufficientBalance = fetchedBalance.isGreaterOrEqualThan(value: totalWei)
 
                 let paymentInfo = PaymentInfo(fiatString: fiatString, estimatedFeesString: estimatedFeesString, totalFiatString: totalFiatString, totalEthereumString: totalEthereumString, balanceString: balanceString, sufficientBalance: sufficientBalance)
                 completion(paymentInfo)
