@@ -34,8 +34,8 @@ final class SOFAWebController: UIViewController {
     }
 
     private let rcpUrl = ToshiWebviewRPCURLPath
-    var paymentRouter: PaymentRouter?
-    var currentTransactionSignCallbackId: String?
+    private var paymentRouter: PaymentRouter?
+    private var currentTransactionSignCallbackId: String?
     
     private lazy var webViewConfiguration: WKWebViewConfiguration = {
         let configuration = WKWebViewConfiguration()
