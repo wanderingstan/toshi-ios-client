@@ -28,7 +28,7 @@ enum RecipientType {
 
 enum PresentationMethod {
     case
-    pushedInNav,
+    fullScreen,
     modalBottomSheet
 }
 
@@ -135,10 +135,10 @@ class PaymentConfirmationViewController: UIViewController {
         }
     }
 
-    var presentationMethod: PresentationMethod = .pushedInNav {
+    var presentationMethod: PresentationMethod = .fullScreen {
         didSet {
             switch presentationMethod {
-            case .pushedInNav:
+            case .fullScreen:
                 // Not much to do here
                 break
             case .modalBottomSheet:
@@ -268,7 +268,7 @@ class PaymentConfirmationViewController: UIViewController {
         super.viewDidLayoutSubviews()
 
         switch presentationMethod {
-        case .pushedInNav:
+        case .fullScreen:
             // do nothing
             return
         case .modalBottomSheet:
@@ -284,7 +284,7 @@ class PaymentConfirmationViewController: UIViewController {
         super.viewWillDisappear(animated)
 
         switch presentationMethod {
-        case .pushedInNav:
+        case .fullScreen:
             // Do nothing
             return
         case .modalBottomSheet:
@@ -524,7 +524,7 @@ class PaymentConfirmationViewController: UIViewController {
 
     @objc func cancelItemTapped() {
         switch presentationMethod {
-        case .pushedInNav:
+        case .fullScreen:
             actuallyDismiss()
         case .modalBottomSheet:
             self.setReceiptShowing(false) {
