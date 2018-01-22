@@ -262,40 +262,44 @@ class EthereumAPIClient: NSObject {
     }
 
     private func registerForPushNotifications(_ timestamp: String, teapot: Teapot, completion: ((_ success: Bool, _ message: String?) -> Void)? = nil) {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        DispatchQueue.main.async {
+            guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
 
-        let cereal = Cereal.shared
-        let path = "/v1/apn/register"
-        let address = cereal.address
-        let params = ["registration_id": appDelegate.token, "address": cereal.paymentAddress]
+            let cereal = Cereal.shared
+            let path = "/v1/apn/register"
+            let address = cereal.address
+            let params = ["registration_id": appDelegate.token, "address": cereal.paymentAddress]
 
-        guard let data = try? JSONSerialization.data(withJSONObject: params, options: []), let payloadString = String(data: data, encoding: .utf8) else {
-            completion?(false, "Invalid payload, request could not be executed")
-            return
-        }
+            guard let data = try? JSONSerialization.data(withJSONObject: params, options: []), let payloadString = String(data: data, encoding: .utf8) else {
+                completion?(false, "Invalid payload, request could not be executed")
+                return
+            }
 
-        let hashedPayload = cereal.sha3WithID(string: payloadString)
-        let signature = "0x\(cereal.signWithID(message: "POST\n\(path)\n\(timestamp)\n\(hashedPayload)"))"
+            let hashedPayload = cereal.sha3WithID(string: payloadString)
+            let signature = "0x\(cereal.signWithID(message: "POST\n\(path)\n\(timestamp)\n\(hashedPayload)"))"
 
-        let headerFields: [String: String] = [
-            "Token-ID-Address": address,
-            "Token-Signature": signature,
-            "Token-Timestamp": timestamp
-        ]
+            let headerFields: [String: String] = [
+                "Token-ID-Address": address,
+                "Token-Signature": signature,
+                "Token-Timestamp": timestamp
+            ]
 
-        let json = RequestParameter(params)
+            let json = RequestParameter(params)
 
-        teapot.post(path, parameters: json, headerFields: headerFields) { result in
-            switch result {
-            case .success(let json, let response):
-                DLog("\n +++ Registered for :\(teapot.baseURL)")
-                DispatchQueue.main.async {
-                    completion?(true, "json: \(json?.dictionary ?? [String: Any]()) response: \(response)")
-                }
-            case .failure(let json, let response, let error):
-                DLog("\(error)")
-                DispatchQueue.main.async {
-                    completion?(false, "json: \(json?.dictionary ?? [String: Any]()) response: \(response), error: \(error)")
+            DispatchQueue.global().async {
+                teapot.post(path, parameters: json, headerFields: headerFields) { result in
+                    switch result {
+                    case .success(let json, let response):
+                        DLog("\n +++ Registered for :\(teapot.baseURL)")
+                        DispatchQueue.main.async {
+                            completion?(true, "json: \(json?.dictionary ?? [String: Any]()) response: \(response)")
+                        }
+                    case .failure(let json, let response, let error):
+                        DLog("\(error)")
+                        DispatchQueue.main.async {
+                            completion?(false, "json: \(json?.dictionary ?? [String: Any]()) response: \(response), error: \(error)")
+                        }
+                    }
                 }
             }
         }

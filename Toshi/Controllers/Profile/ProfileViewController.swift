@@ -18,7 +18,7 @@ import SweetUIKit
 import CoreImage
 import TinyConstraints
 
-class ProfileViewController: UIViewController {
+final class ProfileViewController: DisappearingNavBarViewController {
     
     var profile: TokenUser {
         didSet {
@@ -64,24 +64,6 @@ class ProfileViewController: UIViewController {
     }
     
     private let belowTableViewStyleLabelSpacing: CGFloat = 8
-    
-    private lazy var disappearingNavBar: DisappearingBackgroundNavBar = {
-        let navBar = DisappearingBackgroundNavBar(delegate: self)
-        navBar.setupLeftAsBackButton()
-        
-        return navBar
-    }()
-    
-    private lazy var scrollView: UIScrollView = {
-        let view = UIScrollView()
-        view.showsVerticalScrollIndicator = true
-        view.delaysContentTouches = false
-        if #available(iOS 11, *) {
-            view.contentInsetAdjustmentBehavior = .never
-        }
-        
-        return view
-    }()
     
     private lazy var avatarImageView = AvatarImageView()
     
@@ -186,7 +168,29 @@ class ProfileViewController: UIViewController {
         
         return view
     }()
-    
+
+    // MARK: Superclass property overrides
+
+    override var backgroundTriggerView: UIView {
+        return avatarImageView
+    }
+
+    override var titleTriggerView: UIView {
+        return nameLabel
+    }
+
+    override var disappearingEnabled: Bool {
+        return !isProfileEditable
+    }
+
+    override var topSpacerHeight: CGFloat {
+        if isProfileEditable {
+            return navBarHeight + .giantInterItemSpacing
+        } else {
+            return navBarHeight
+        }
+    }
+
     // MARK: - Initialization
 
     init(profile: TokenUser, readOnlyMode: Bool = true) {
@@ -194,12 +198,6 @@ class ProfileViewController: UIViewController {
         self.isReadOnlyMode = readOnlyMode
 
         super.init(nibName: nil, bundle: nil)
-
-        if #available(iOS 11.0, *) {
-            edgesForExtendedLayout = .all
-        } else {
-            edgesForExtendedLayout = .bottom
-        }
 
         title = Localized("profile_title")
     }
@@ -213,91 +211,37 @@ class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = Theme.lightGrayBackgroundColor
-        setupActivityIndicator()
+        view.backgroundColor = Theme.viewBackgroundColor
+
+        if shouldShowMoreButton {
+            navBar.setRightButtonImage(#imageLiteral(resourceName: "more_centered"), accessibilityLabel: Localized("accessibility_more"))
+        }
         
-        let navBarHeight = DisappearingBackgroundNavBar.defaultHeight
-        setupScrollView(navBarHeight: navBarHeight)
-        setupDisappearingNavBar(height: navBarHeight)
-        setupContent(in: scrollView)
+        if isProfileEditable {
+            navBar.showTitleAndBackground()
+        }
+
+        setupActivityIndicator()
 
         configureForCurrentProfile()
         updateReputation()
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        navigationController?.setNavigationBarHidden(true, animated: animated)
+    // MARK: - View Setup
+
+    override func addScrollableContent(to contentView: UIView) {
+        let topSpacer = addTopSpacer(to: contentView)
+
+        let profileContainer = addProfileDetailsSection(to: contentView, below: topSpacer)
+
+        let titleContainer = addReputationTitle(to: contentView, below: profileContainer)
+
+        let reputationContainer = addReputationSection(to: contentView, below: titleContainer)
+
+        addGrayBackgroundBottom(to: contentView, below: reputationContainer)
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
-        navigationController?.setNavigationBarHidden(false, animated: animated)
-        
-        super.viewWillDisappear(animated)
-    }
-    
-    // MARK: - View Setup
-    
-    private func setupScrollView(navBarHeight: CGFloat) {
-        view.addSubview(scrollView)
-        scrollView.edgesToSuperview(excluding: .bottom)
-        scrollView.bottom(to: layoutGuide())
-    }
-    
-    private func setupDisappearingNavBar(height: CGFloat) {
-        view.addSubview(disappearingNavBar)
-        
-        disappearingNavBar.edgesToSuperview(excluding: .bottom)
-        disappearingNavBar.height(height)
-        
-        if shouldShowMoreButton {
-            disappearingNavBar.setRightButtonImage(#imageLiteral(resourceName: "more_centered"), accessibilityLabel: Localized("accessibility_more"))
-        }
-        
-        if isProfileEditable {
-            disappearingNavBar.showTitleLabel(true, animated: false)
-            disappearingNavBar.showBackground(true, animated: false)
-        }
-    }
-    
-    private func setupContent(in scrollView: UIScrollView) {
-        assert(scrollView.superview != nil)
-        
-        let containerView = UIView()
-        
-        scrollView.addSubview(containerView)
-        
-        containerView.edgesToSuperview()
-        containerView.width(to: scrollView)
-        
-        let topSpacer = addTopSpacer(to: containerView)
-        let profileContainer = addProfileDetailsSection(to: containerView, below: topSpacer)
-        
-        addReputationTitle(to: containerView, below: profileContainer)
-        addReputationSection(to: containerView, below: reputationTitle)
-    }
-    
     // MARK: Profile
-    
-    private func addTopSpacer(to container: UIView) -> UIView {
-        // Top spacer allows content to slide under the nav bar
-        let topSpacer = UIView()
-        topSpacer.backgroundColor = Theme.viewBackgroundColor
-        
-        container.addSubview(topSpacer)
-        
-        topSpacer.edgesToSuperview(excluding: .bottom)
-        
-        var spacerHeight = DisappearingBackgroundNavBar.defaultHeight
-        if isProfileEditable {
-            spacerHeight += .giantInterItemSpacing
-        }
-        
-        topSpacer.height(spacerHeight)
-        
-        return topSpacer
-    }
     
     private func addProfileDetailsSection(to container: UIView, below viewToPinToBottomOf: UIView) -> UIView {
         let profileDetailsStackView = UIStackView()
@@ -317,7 +261,7 @@ class ProfileViewController: UIViewController {
         avatarImageView.width(.defaultAvatarHeight)
         profileDetailsStackView.addSpacing(margin, after: avatarImageView)
         
-        profileDetailsStackView.addWithDefaultConstraints(view: nameLabel)
+        profileDetailsStackView.addWithDefaultConstraints(view: nameLabel, margin: margin)
         
         if isBotProfile {
             setupRestOfBotProfileSection(in: profileDetailsStackView, after: nameLabel, margin: margin)
@@ -408,15 +352,26 @@ class ProfileViewController: UIViewController {
 
     // MARK: Reputation
     
-    private func addReputationTitle(to container: UIView, below viewToPinToBottomOf: UIView) {
-        container.addSubview(reputationTitle)
-        
+    private func addReputationTitle(to container: UIView, below viewToPinToBottomOf: UIView) -> UIView {
+        let titleContainer = UIView()
+        titleContainer.backgroundColor = Theme.lightGrayBackgroundColor
+
+        container.addSubview(titleContainer)
+        titleContainer.leftToSuperview()
+        titleContainer.rightToSuperview()
+        titleContainer.topToBottom(of: viewToPinToBottomOf)
+
+        titleContainer.addSubview(reputationTitle)
+
         reputationTitle.leftToSuperview(offset: .defaultMargin)
         reputationTitle.rightToSuperview(offset: -.defaultMargin)
-        reputationTitle.topToBottom(of: viewToPinToBottomOf, offset: .giantInterItemSpacing)
+        reputationTitle.topToSuperview(offset: .giantInterItemSpacing)
+        reputationTitle.bottomToSuperview(offset: -belowTableViewStyleLabelSpacing)
+
+        return titleContainer
     }
     
-    private func addReputationSection(to container: UIView, below viewToPinToBottomOf: UIView) {
+    private func addReputationSection(to container: UIView, below viewToPinToBottomOf: UIView) -> UIView {
         let reputationStackView = UIStackView()
         reputationStackView.addBackground(with: Theme.viewBackgroundColor)
         reputationStackView.axis = .vertical
@@ -426,9 +381,8 @@ class ProfileViewController: UIViewController {
         
         reputationStackView.leftToSuperview()
         reputationStackView.rightToSuperview()
-        reputationStackView.topToBottom(of: viewToPinToBottomOf, offset: belowTableViewStyleLabelSpacing)
-        reputationStackView.bottom(to: container, offset: -66) // eyeballed
-        
+        reputationStackView.topToBottom(of: viewToPinToBottomOf)
+
         let topBorder = BorderView()
         reputationStackView.addWithDefaultConstraints(view: topBorder)
         topBorder.addHeightConstraint()
@@ -440,6 +394,11 @@ class ProfileViewController: UIViewController {
             reputationStackView.addWithDefaultConstraints(view: rateThisUserButton)
             rateThisUserButton.height(.defaultButtonHeight)
 
+            if isBotProfile {
+                rateThisUserButton.setTitle(Localized("profile_rate_user"), for: .normal)
+            } else {
+                rateThisUserButton.setTitle(Localized("profile_rate_user"), for: .normal)
+            }
         } else {
             reputationStackView.addSpacing(.largeInterItemSpacing, after: reputationView.superview!)
         }
@@ -447,6 +406,8 @@ class ProfileViewController: UIViewController {
         let bottomBorder = BorderView()
         reputationStackView.addWithDefaultConstraints(view: bottomBorder)
         bottomBorder.addHeightConstraint()
+
+        return reputationStackView
     }
     
     private func addReputationView(to stackView: UIStackView) {
@@ -460,7 +421,24 @@ class ProfileViewController: UIViewController {
         stackView.addWithDefaultConstraints(view: container)
         stackView.addSpacing(.defaultMargin, after: container)
     }
-    
+
+    private func addGrayBackgroundBottom(to container: UIView, below viewToPinToBottomOf: UIView) {
+        let backgroundBottom = UIView()
+        backgroundBottom.backgroundColor = Theme.lightGrayBackgroundColor
+
+        container.addSubview(backgroundBottom)
+
+        backgroundBottom.topToBottom(of: viewToPinToBottomOf)
+        backgroundBottom.leftToSuperview()
+        backgroundBottom.rightToSuperview()
+
+        // Prevent the user from discovering the background of the superview is not gray if they scroll beyond
+        // the desired bottom spacing.
+        let backgroundHeight = UIScreen.main.bounds.height
+        backgroundBottom.height(backgroundHeight)
+        backgroundBottom.bottomToSuperview(offset: (backgroundHeight - .largeInterItemSpacing))
+    }
+
     // MARK: - Configuration
     
     private func configureForCurrentProfile() {
@@ -468,13 +446,12 @@ class ProfileViewController: UIViewController {
         nameLabel.text = profile.name.isEmpty ? nil : profile.name
         aboutContentLabel.text = profile.about.isEmpty ? nil : profile.about
         locationContentLabel.text = profile.location.isEmpty ? nil : profile.location
-        
         usernameLabel.text = profile.displayUsername
         
         if isProfileEditable {
-            disappearingNavBar.setTitle(Localized("profile_me_title"))
+            navBar.setTitle(Localized("profile_me_title"))
         } else {
-            disappearingNavBar.setTitle(profile.nameOrDisplayName)
+            navBar.setTitle(profile.nameOrDisplayName)
         }
 
         if aboutStackView.superview != nil {
@@ -658,6 +635,18 @@ class ProfileViewController: UIViewController {
     private func isCurrentUserFavorite() -> Bool {
         return Yap.sharedInstance.containsObject(for: profile.address, in: TokenUser.favoritesCollectionKey)
     }
+
+    // MARK: - Background Nav Bar Delegate Overrides
+
+    override func didTapRightButton(in navBar: DisappearingBackgroundNavBar) {
+        guard shouldShowMoreButton else {
+            assertionFailure("Probably shouldn't be able to tap a button that shouldn't be showing")
+
+            return
+        }
+
+        didSelectMoreButton()
+    }
 }
 
 // MARK: - Activity Indicating
@@ -692,24 +681,5 @@ extension ProfileViewController: PaymentRouterDelegate {
 
     func paymentRouterDidSucceedPayment(_ paymentRouter: PaymentRouter, parameters: [String: Any], transactionHash: String?, unsignedTransaction: String?, error: ToshiError?) {
         Navigator.topViewController?.dismiss(animated: true, completion: nil)
-    }
-}
-
-// MARK: - Disappearing Background Nav Bar Delegate
-
-extension ProfileViewController: DisappearingBackgroundNavBarDelegate {
-    
-    func didTapLeftButton(in navBar: DisappearingBackgroundNavBar) {
-        self.navigationController?.popViewController(animated: true)
-    }
-    
-    func didTapRightButton(in navBar: DisappearingBackgroundNavBar) {
-        guard shouldShowMoreButton else {
-            assertionFailure("Probably shouldn't be able to tap a button that shouldn't be showing")
-            
-            return
-        }
-
-        didSelectMoreButton()
     }
 }

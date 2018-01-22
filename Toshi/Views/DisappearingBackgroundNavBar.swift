@@ -26,12 +26,24 @@ protocol DisappearingBackgroundNavBarDelegate: class {
 /// A view to allow a fake nav bar that can appear and disappear as the user scrolls, but allowing its buttons to stay in place.
 final class DisappearingBackgroundNavBar: UIView {
     
-    private let animationSpeed = 0.25
     private let interItemSpacing: CGFloat = 8
     
     weak var delegate: DisappearingBackgroundNavBarDelegate?
-    
-    static let defaultHeight: CGFloat = 64
+
+    private static let containerHeight: CGFloat = 44
+
+    static var defaultHeight: CGFloat {
+        if #available(iOS 11, *) {
+            return DisappearingBackgroundNavBar.containerHeight
+        } else {
+            // Take the status bar into account
+            return DisappearingBackgroundNavBar.containerHeight + 20
+        }
+    }
+
+    private var titleCenterYConstraint: NSLayoutConstraint?
+
+    var heightConstraint: NSLayoutConstraint?
     
     private lazy var leftButton: UIButton = {
         let button = UIButton(withAutoLayout: true)
@@ -49,13 +61,6 @@ final class DisappearingBackgroundNavBar: UIView {
         return button
     }()
     
-    private lazy var bottomBorder: UIView = {
-        let view = UIView(withAutoLayout: true)
-        view.backgroundColor = Theme.borderColor
-        
-        return view
-    }()
-    
     private lazy var titleLabel: UILabel = {
         let label = UILabel(withAutoLayout: false)
         label.font = Theme.preferredSemibold()
@@ -67,6 +72,7 @@ final class DisappearingBackgroundNavBar: UIView {
     private lazy var backgroundView: UIView = {
         let view = UIView(withAutoLayout: true)
         view.backgroundColor = .white
+        view.clipsToBounds = true
         
         let bottomBorder = BorderView()
         view.addSubview(bottomBorder)
@@ -75,6 +81,8 @@ final class DisappearingBackgroundNavBar: UIView {
         
         return view
     }()
+
+    private lazy var bottomBorder = BorderView()
     
     // MARK: - Initialization
     
@@ -83,10 +91,7 @@ final class DisappearingBackgroundNavBar: UIView {
         self.delegate = delegate
         
         setupBackground()
-        setupLeftButton()
-        setupRightButton()
-        setupTitleLabel(leftButton: leftButton, rightButton: rightButton)
-        setupBottomBorder()
+        setupButtonAndTitleContainer()
     }
     
     private func setupBackground() {
@@ -95,12 +100,25 @@ final class DisappearingBackgroundNavBar: UIView {
         backgroundView.edgesToSuperview()
         backgroundView.alpha = 0
     }
+
+    private func setupButtonAndTitleContainer() {
+        let container = UIView(withAutoLayout: false)
+        container.backgroundColor = .clear
+
+        addSubview(container)
+        container.edgesToSuperview(excluding: .top)
+        container.height(DisappearingBackgroundNavBar.containerHeight)
+
+        setupLeftButton(in: container)
+        setupRightButton(in: container)
+        setupTitleLabel(in: container, leftButton: leftButton, rightButton: rightButton)
+    }
     
-    private func setupLeftButton() {
-        addSubview(leftButton)
+    private func setupLeftButton(in view: UIView) {
+        view.addSubview(leftButton)
         
         leftButton.leftToSuperview(offset: interItemSpacing)
-        leftButton.centerYToSuperview(offset: 10)
+        leftButton.centerYToSuperview()
         leftButton.setContentHuggingPriority(.required, for: .horizontal)
         leftButton.width(min: .defaultButtonHeight)
         leftButton.height(min: .defaultButtonHeight)
@@ -108,11 +126,11 @@ final class DisappearingBackgroundNavBar: UIView {
         leftButton.isHidden = true
     }
     
-    private func setupRightButton() {
-        addSubview(rightButton)
+    private func setupRightButton(in view: UIView) {
+        view.addSubview(rightButton)
         
         rightButton.rightToSuperview(offset: interItemSpacing)
-        rightButton.centerYToSuperview(offset: 10)
+        rightButton.centerYToSuperview()
         rightButton.setContentHuggingPriority(.required, for: .horizontal)
         rightButton.width(min: .defaultButtonHeight)
         rightButton.height(min: .defaultButtonHeight)
@@ -120,28 +138,17 @@ final class DisappearingBackgroundNavBar: UIView {
         rightButton.isHidden = true
     }
     
-    private func setupTitleLabel(leftButton: UIButton, rightButton: UIButton) {
-        assert(leftButton.superview != nil)
-        assert(rightButton.superview != nil)
+    private func setupTitleLabel(in view: UIView, leftButton: UIButton, rightButton: UIButton) {
+        view.addSubview(titleLabel)
         
-        addSubview(titleLabel)
-        
-        titleLabel.centerYToSuperview(offset: 10)
+        titleCenterYConstraint = titleLabel.centerYToSuperview()
         titleLabel.leftToRight(of: leftButton, offset: interItemSpacing)
         titleLabel.rightToLeft(of: rightButton, offset: interItemSpacing)
-        
+        titleLabel.centerXToSuperview()
+
         titleLabel.alpha = 0
     }
-    
-    private func setupBottomBorder() {
-        addSubview(bottomBorder)
-        
-        bottomBorder.edgesToSuperview(excluding: .top)
-        bottomBorder.height(CGFloat.lineHeight)
-        
-        bottomBorder.alpha = 0
-    }
-    
+
     // MARK: - Button Images
     
     /// Sets up the left button to appear to be a back button.
@@ -199,37 +206,50 @@ final class DisappearingBackgroundNavBar: UIView {
     }
     
     // MARK: - Show/Hide
-    
-    func showBottomBorder(_ shouldShow: Bool, animated: Bool = true) {
-        showView(bottomBorder, shouldShow: shouldShow, animated: animated)
+
+    /// Makes both title and background immediately visible. Useful when the bar should always be shown.
+    func showTitleAndBackground() {
+        setAlpha(1, on: [titleLabel, backgroundView])
     }
-    
-    func showTitleLabel(_ shouldShow: Bool, animated: Bool = true) {
-        showView(titleLabel, shouldShow: shouldShow, animated: animated)
+
+    func setBackgroundAlpha(_ alpha: CGFloat) {
+        setAlpha(alpha, on: [backgroundView])
     }
-    
-    func showBackground(_ shouldShow: Bool, animated: Bool = true) {
-        showView(backgroundView, shouldShow: shouldShow, animated: animated)
+
+    func setTitleAlpha(_ alpha: CGFloat) {
+        setAlpha(alpha, on: [titleLabel])
     }
-    
-    private func showView(_ view: UIView, shouldShow: Bool, animated: Bool) {
-        let duration: TimeInterval = animated ? animationSpeed : 0
-        
-        let targetAlpha: CGFloat
-        let curve: UIViewAnimationOptions
-        if shouldShow {
-            targetAlpha = 1
-            curve = [.curveEaseOut]
-        } else {
-            targetAlpha = 0
-            curve = [.curveEaseIn]
+
+    private func setAlpha(_ alpha: CGFloat, on views: [UIView]) {
+        for view in views {
+            view.alpha = alpha
         }
-        
-        UIView.animate(withDuration: duration, delay: 0, options: curve, animations: {
-            view.alpha = targetAlpha
-        })
     }
-    
+
+    /// Sets the title offset based on how much of a target view has been scrolled past the bottom of the bar.
+    ///
+    /// - Parameter scrollPastPercentage: The percentage of the target view which has been scrolled past the bottom of the bar. Should be between 0 and 1.
+    func setTitleOffsetPercentage(from scrollPastPercentage: CGFloat) {
+        guard let constraint = titleCenterYConstraint else { /* not set up yet */ return }
+
+        let containerHeight = DisappearingBackgroundNavBar.containerHeight
+        let titleHeight = titleLabel.frame.height
+        let minAboveNav: CGFloat = 4 // per Marek
+
+        let minOffset: CGFloat = 0
+        let maxOffset = ((containerHeight - titleHeight) / 2) - minAboveNav
+        let offsetDelta = maxOffset - minOffset
+
+        switch scrollPastPercentage {
+        case 0: // We have not scrolled past the title at all, it shouldn't be visible.
+            constraint.constant = maxOffset
+        case 1: // We have totally scrolled past the title, it should be visible.
+            constraint.constant = minOffset
+        default: // Somewhere in the middle.
+            constraint.constant = maxOffset - (offsetDelta * scrollPastPercentage)
+        }
+    }
+
     // MARK: - Action Targets
     
     @objc private func leftButtonTapped() {
