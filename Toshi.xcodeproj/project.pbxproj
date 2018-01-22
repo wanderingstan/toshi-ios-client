@@ -830,7 +830,6 @@
 		D197B1E9BB5E12653D8EE2CC /* SofaStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D197BAEBA12E2D8F04A0F846 /* SofaStatus.swift */; };
 		D197B1EB92E75AA88459C940 /* AcceptDeclineButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D197B18261400D5175ADC6C7 /* AcceptDeclineButtonsView.swift */; };
 		D197B20920768C8CC915FE33 /* PaymentConfirmationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D197BB6208925B43A58D5483 /* PaymentConfirmationViewController.swift */; };
-		D197B20F1EA35DF8856EB4B3 /* PaymentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D197BD33506B4EB09BA577F3 /* PaymentViewModel.swift */; };
 		D197B2103355CD8C1BFE1537 /* AcceptDeclineButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D197B18261400D5175ADC6C7 /* AcceptDeclineButtonsView.swift */; };
 		D197B213A9F6B8634043B229 /* PaymentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D197BD33506B4EB09BA577F3 /* PaymentViewModel.swift */; };
 		D197B21874C1B7FE6FC404D3 /* PaymentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D197BD33506B4EB09BA577F3 /* PaymentViewModel.swift */; };
@@ -3181,7 +3180,6 @@
 				D197BC5E2A33FB5B00A55942 /* String+nsRange.swift in Sources */,
 				D197B6F01E52F247B8982310 /* String+nsRangeTests.swift in Sources */,
 				33816A6B2003CBF200FE81BD /* MessageParsingTests.swift in Sources */,
-				D197B20F1EA35DF8856EB4B3 /* PaymentViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
