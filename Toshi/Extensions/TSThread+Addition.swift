@@ -17,7 +17,7 @@ import Foundation
 
 extension TSThread {
 
-    // Needs to be called on main thread as it involves UIAppDelegate
+    /// Needs to be called on main thread as it involves UIAppDelegate
     func recipient() -> TokenUser? {
         guard let recipientAddress = contactIdentifier() else { return nil }
 
