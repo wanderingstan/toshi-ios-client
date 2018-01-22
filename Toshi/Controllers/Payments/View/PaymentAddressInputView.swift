@@ -5,7 +5,7 @@ import TinyConstraints
 protocol PaymentAddressInputDelegate: class {
     func didRequestScanner()
     func didRequestSendPayment()
-    func didChangeAddress(to address: String?)
+    func didChangeAddress()
 }
 
 class PaymentAddressInputView: UIView {
@@ -62,6 +62,8 @@ class PaymentAddressInputView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
 
+        NotificationCenter.default.addObserver(self, selector: #selector(didChangeAddress), name: Notification.Name.UITextFieldTextDidChange, object: nil)
+
         addSubview(topDivider)
         addSubview(addressTextField)
         addSubview(qrButton)
@@ -91,15 +93,13 @@ class PaymentAddressInputView: UIView {
     @objc func qrButtonTapped(_ button: UIButton) {
         delegate?.didRequestScanner()
     }
+
+    @objc func didChangeAddress() {
+        delegate?.didChangeAddress()
+    }
 }
 
 extension PaymentAddressInputView: UITextFieldDelegate {
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        delegate?.didChangeAddress(to: textField.text)
-
-        return true
-
-    }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         delegate?.didRequestSendPayment()
