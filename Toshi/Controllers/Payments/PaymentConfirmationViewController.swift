@@ -26,6 +26,12 @@ enum RecipientType {
     dapp(info: DappInfo)
 }
 
+enum PresentationMethod {
+    case
+    pushedInNav,
+    modalBottomSheet
+}
+
 class PaymentConfirmationViewController: UIViewController {
 
     weak var delegate: PaymentConfirmationViewControllerDelegate?
@@ -110,6 +116,36 @@ class PaymentConfirmationViewController: UIViewController {
     }()
 
     // MARK: Payment sheet style title
+
+    private var hasLaidOutBefore = false
+    private var bottomOfReceiptConstraint: NSLayoutConstraint?
+
+    var backgroundView: UIView? {
+        didSet {
+            guard let background = backgroundView else { return }
+
+            let alpha = UIView()
+            alpha.backgroundColor = .black
+            alpha.alpha = 0.5
+
+            background.addSubview(alpha)
+            alpha.edgesToSuperview()
+
+            view.insertSubview(background, at: 0)
+        }
+    }
+
+    var presentationMethod: PresentationMethod = .pushedInNav {
+        didSet {
+            switch presentationMethod {
+            case .pushedInNav:
+                // Not much to do here
+                break
+            case .modalBottomSheet:
+                self.modalTransitionStyle = .crossDissolve
+            }
+        }
+    }
 
     private lazy var paymentSheetTitleLabel: UILabel = {
         let view = UILabel()
@@ -228,6 +264,34 @@ class PaymentConfirmationViewController: UIViewController {
         }
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        switch presentationMethod {
+        case .pushedInNav:
+            // do nothing
+            return
+        case .modalBottomSheet:
+            guard !hasLaidOutBefore, bottomOfReceiptConstraint != nil else { return }
+
+            hasLaidOutBefore = true
+            setReceiptShowing(false, animated: false)
+            setReceiptShowing(true)
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        switch presentationMethod {
+        case .pushedInNav:
+            // Do nothing
+            return
+        case .modalBottomSheet:
+            setReceiptShowing(false, animated: animated)
+        }
+    }
+
     // MARK: - View Setup
 
     private func addSubviewsAndConstraints() {
@@ -237,8 +301,7 @@ class PaymentConfirmationViewController: UIViewController {
         case .user:
             addProfileStackViewLayout(to: view, above: receiptPayBalanceView)
         case .dapp:
-            let dappStackView = addDappStackViewLayout(to: view, above: receiptPayBalanceView)
-            addBackgroundView(to: view, above: dappStackView)
+            addDappStackViewLayout(to: view, above: receiptPayBalanceView)
         }
     }
 
@@ -246,13 +309,17 @@ class PaymentConfirmationViewController: UIViewController {
         let receiptPayBalanceStackView = UIStackView()
         receiptPayBalanceStackView.axis = .vertical
         receiptPayBalanceStackView.alignment = .center
+
+        receiptPayBalanceStackView.addBackground(with: Theme.viewBackgroundColor, margin: .defaultMargin)
+
         parentView.addSubview(receiptPayBalanceStackView)
 
-        receiptPayBalanceStackView.bottom(to: layoutGuide(), offset: -.defaultMargin)
+        bottomOfReceiptConstraint = receiptPayBalanceStackView.bottom(to: layoutGuide(), offset: -.defaultMargin)
         receiptPayBalanceStackView.leftToSuperview(offset: .defaultMargin)
         receiptPayBalanceStackView.rightToSuperview(offset: .defaultMargin)
 
         receiptPayBalanceStackView.addWithDefaultConstraints(view: receiptView)
+
         receiptPayBalanceStackView.addSpacing(.largeInterItemSpacing, after: receiptView)
 
         // Don't add the network fees view as an arranged subview - pin it to the receipt view
@@ -272,6 +339,8 @@ class PaymentConfirmationViewController: UIViewController {
         let profileDetailsStackView = UIStackView()
         profileDetailsStackView.axis = .vertical
         profileDetailsStackView.alignment = .center
+
+        profileDetailsStackView.addBackground(with: Theme.viewBackgroundColor)
 
         // Setup layout guides to allow the profile details stack view to float in between the top of
         // the parent view and the top of the view to pin it above.
@@ -305,15 +374,18 @@ class PaymentConfirmationViewController: UIViewController {
         profileDetailsStackView.addWithDefaultConstraints(view: userNameLabel)
     }
 
-    func addDappStackViewLayout(to parentView: UIView, above viewToPinToTopOf: UIView) -> UIView {
+    func addDappStackViewLayout(to parentView: UIView, above viewToPinToTopOf: UIView) {
         let dappStackView = UIStackView()
         dappStackView.axis = .vertical
         dappStackView.alignment = .center
 
         parentView.addSubview(dappStackView)
+
+        dappStackView.addBackground(with: Theme.viewBackgroundColor)
+
         dappStackView.leftToSuperview()
         dappStackView.rightToSuperview()
-        dappStackView.bottomToTop(of: viewToPinToTopOf, offset: -.largeInterItemSpacing)
+        dappStackView.bottomToTop(of: viewToPinToTopOf)
 
         dappStackView.addStandardBorder()
         addTitleCancelView(to: dappStackView)
@@ -347,7 +419,7 @@ class PaymentConfirmationViewController: UIViewController {
 
         dappStackView.addStandardBorder()
 
-        return dappStackView
+        dappStackView.addSpacerView(with: .largeInterItemSpacing)
     }
 
     func addTitleCancelView(to stackView: UIStackView) {
@@ -367,15 +439,25 @@ class PaymentConfirmationViewController: UIViewController {
         titleView.height(.defaultBarHeight)
     }
 
-    func addBackgroundView(to parentView: UIView, above viewToPinToTopOf: UIView) {
-        let background = UIView()
-        background.backgroundColor = .clear
+    // MARK: - Animation
 
-        parentView.addSubview(background)
-        background.edgesToSuperview(excluding: .bottom)
-        background.bottomToTop(of: viewToPinToTopOf)
+    private func setReceiptShowing(_ showing: Bool, animated: Bool = true, completion: (() -> Void)? = nil) {
+        guard let bottomConstraint = bottomOfReceiptConstraint else { /* nothing to adjust yet */ return }
+
+        let targetConstraintConstant: CGFloat = showing ? .largeInterItemSpacing : view.frame.height
+
+        guard bottomOfReceiptConstraint?.constant != targetConstraintConstant else { /* already where we want it to be */ return }
+
+        bottomConstraint.constant = targetConstraintConstant
+        let options: UIViewAnimationOptions = showing ? [.curveEaseOut] : [.curveEaseIn]
+        let duration = animated ? 0.4 : 0
+
+        UIView.animate(withDuration: duration, delay: 0, options: options, animations: {
+            self.view.layoutIfNeeded()
+        }, completion: { _ in
+            completion?()
+        })
     }
-
     // MARK: - Configuration for display
 
     private func displayRecipientDetails() {
@@ -441,6 +523,17 @@ class PaymentConfirmationViewController: UIViewController {
     // MARK: - Action Targets
 
     @objc func cancelItemTapped() {
+        switch presentationMethod {
+        case .pushedInNav:
+            actuallyDismiss()
+        case .modalBottomSheet:
+            self.setReceiptShowing(false) {
+                self.actuallyDismiss()
+           }
+        }
+    }
+
+    private func actuallyDismiss() {
         self.dismiss(animated: true, completion: nil)
         delegate?.paymentConfirmationViewControllerDidCancel(on: self)
     }
