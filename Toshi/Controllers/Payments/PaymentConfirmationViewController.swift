@@ -17,7 +17,6 @@ import Foundation
 
 protocol PaymentConfirmationViewControllerDelegate: class {
     func paymentConfirmationViewControllerFinished(on controller: PaymentConfirmationViewController, parameters: [String: Any], transactionHash: String?, error: ToshiError?)
-    func paymentConfirmationViewControllerDidCancel(on controller: PaymentConfirmationViewController)
 }
 
 enum RecipientType {
@@ -442,16 +441,12 @@ class PaymentConfirmationViewController: UIViewController {
 
     @objc func cancelItemTapped() {
         self.dismiss(animated: true, completion: nil)
-        delegate?.paymentConfirmationViewControllerDidCancel(on: self)
     }
 
     @objc func didTapPayButton() {
         payButton.showSpinner()
         guard shouldSendSignedTransaction else {
-            dismiss(animated: true, completion: {
-                self.delegate?.paymentConfirmationViewControllerFinished(on: self, parameters: self.paymentManager.parameters, transactionHash: "", error: nil)
-            })
-
+            self.delegate?.paymentConfirmationViewControllerFinished(on: self, parameters: self.paymentManager.parameters, transactionHash: "", error: nil)
             return
         }
 
@@ -461,9 +456,7 @@ class PaymentConfirmationViewController: UIViewController {
             guard error == nil else {
                 let alert = UIAlertController(title: Localized("transaction_error_message"), message: (error?.description ?? ToshiError.genericError.description), preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: Localized("alert-ok-action-title"), style: .default, handler: { _ in
-                    weakSelf.dismiss(animated: true, completion: {
-                        weakSelf.delegate?.paymentConfirmationViewControllerFinished(on: weakSelf, parameters: weakSelf.paymentManager.parameters, transactionHash: transactionHash, error: error)
-                    })
+                    weakSelf.delegate?.paymentConfirmationViewControllerFinished(on: weakSelf, parameters: weakSelf.paymentManager.parameters, transactionHash: transactionHash, error: error)
                 }))
 
                 Navigator.presentModally(alert)
@@ -471,9 +464,7 @@ class PaymentConfirmationViewController: UIViewController {
                 return
             }
 
-            weakSelf.dismiss(animated: true, completion: {
-                weakSelf.delegate?.paymentConfirmationViewControllerFinished(on: weakSelf, parameters: weakSelf.paymentManager.parameters, transactionHash: transactionHash, error: error)
-            })
+            weakSelf.delegate?.paymentConfirmationViewControllerFinished(on: weakSelf, parameters: weakSelf.paymentManager.parameters, transactionHash: transactionHash, error: error)
         }
     }
 }

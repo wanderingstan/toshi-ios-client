@@ -117,14 +117,10 @@ extension PaymentRouter: PaymentConfirmationViewControllerDelegate {
 
     func paymentConfirmationViewControllerFinished(on controller: PaymentConfirmationViewController, parameters: [String: Any], transactionHash: String?, error: ToshiError?) {
 
-        if Navigator.topViewController is PaymentNavigationController {
-            Navigator.rootViewController?.dismiss(animated: true)
+        if let paymentNavigationController = Navigator.rootViewController as? PaymentNavigationController{
+            paymentNavigationController.dismiss(animated: true)
         }
 
         self.delegate?.paymentRouterDidSucceedPayment(self, parameters: parameters, transactionHash: transactionHash, unsignedTransaction: controller.originalUnsignedTransaction, error: error)
-    }
-
-    func paymentConfirmationViewControllerDidCancel(on controller: PaymentConfirmationViewController) {
-        Navigator.topViewController?.dismiss(animated: true)
     }
 }
