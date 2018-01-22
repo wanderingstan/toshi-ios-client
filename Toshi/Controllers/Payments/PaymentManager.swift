@@ -58,7 +58,7 @@ class PaymentManager {
             let totalEthereumString = EthereumConverter.ethereumValueString(forWei: totalWei)
 
             /// We don't care about the cached balance since we immediately want to know if the current balance is sufficient or not.
-            EthereumAPIClient.shared.getBalance(cachedBalanceCompletion: { _, _ in }, fetchedBalanceCompletion: { fetchedBalance, error in
+            EthereumAPIClient.shared.getBalance(cachedBalanceCompletion: { _, _ in }, fetchedBalanceCompletion: { fetchedBalance, _ in
                 //WARNING: What to do when we have an error here?
 
                 let balanceString = EthereumConverter.fiatValueStringWithCode(forWei: fetchedBalance, exchangeRate: ExchangeRateClient.exchangeRate)
@@ -74,7 +74,7 @@ class PaymentManager {
         guard let transaction = transaction else { return }
         let signedTransaction = "0x\(Cereal.shared.signWithWallet(hex: transaction))"
 
-        EthereumAPIClient.shared.sendSignedTransaction(originalTransaction: transaction, transactionSignature: signedTransaction) { success, transactionHash, error in
+        EthereumAPIClient.shared.sendSignedTransaction(originalTransaction: transaction, transactionSignature: signedTransaction) { _, transactionHash, error in
             completion(error, transactionHash)
         }
     }
