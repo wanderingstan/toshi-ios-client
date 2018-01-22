@@ -73,12 +73,8 @@ class PaymentManager {
     func sendPayment(completion: @escaping ((_ error: ToshiError?, _ transactionHash: String?) -> Void)) {
         guard let transaction = transaction else { return }
         let signedTransaction = "0x\(Cereal.shared.signWithWallet(hex: transaction))"
-
-        print("--- SENDING PAYMENT ---")
-
+        
         EthereumAPIClient.shared.sendSignedTransaction(originalTransaction: transaction, transactionSignature: signedTransaction) { success, transactionHash, error in
-
-            print("COMPLETED Payment: SUCCESS: \(success)")
             completion(error, transactionHash)
         }
     }
