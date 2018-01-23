@@ -63,8 +63,15 @@ class StringAdditionsTests: XCTestCase {
         XCTAssertEqual("FOO.BAR".asPossibleURLString, "https://foo.bar")
     }
     
-    func testExplicitPrefixCreatesPossibleURLString() {
-        XCTAssertNil("localhost".asPossibleURLString)
-        XCTAssertEqual("https://localhost".asPossibleURLString, "https://localhost")
+    func testDescribesValueLargerThanZero() {
+        XCTAssertTrue("1.00".isValidValue())
+        XCTAssertTrue("1,00".isValidValue())
+        XCTAssertTrue("0.10".isValidValue())
+        XCTAssertTrue("0,10".isValidValue())
+        XCTAssertFalse("0.00".isValidValue())
+        XCTAssertFalse("0,00".isValidValue())
+        XCTAssertFalse("-1.00".isValidValue())
+        XCTAssertFalse("-1,00".isValidValue())
+        XCTAssertFalse("hi".isValidValue())
     }
 }

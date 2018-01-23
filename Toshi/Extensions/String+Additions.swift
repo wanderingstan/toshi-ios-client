@@ -64,4 +64,14 @@ extension String {
             return self
         }
     }
+
+    func isValidValue() -> Bool {
+        guard !isEmpty else { return false }
+        // To account for value strings in 0,10 format we change them to 0.10
+        let valueString = self.replacingOccurrences(of: ",", with: ".")
+
+        let floatValue = Float(valueString) ?? 0
+
+        return floatValue > 0.0
+    }
 }
