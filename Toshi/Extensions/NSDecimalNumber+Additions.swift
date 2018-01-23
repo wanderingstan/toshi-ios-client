@@ -66,7 +66,6 @@ extension NSDecimalNumber {
         self.init(string: decimal)
     }
 
-    //WARNING: this method needs muchos testing!
     func isGreaterOrEqualThan(value: NSDecimalNumber) -> Bool {
         let result = compare(value)
 
@@ -78,7 +77,6 @@ extension NSDecimalNumber {
         }
     }
 
-    //WARNING: this method needs muchos testing!
     func isGreaterThan(value: NSDecimalNumber) -> Bool {
         let result = compare(value)
 
