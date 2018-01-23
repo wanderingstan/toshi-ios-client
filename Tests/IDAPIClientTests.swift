@@ -143,7 +143,7 @@ class IDAPIClientTests: QuickSpec {
                     let paymentAddress = "0x1ad0bb2d14595fa6ad885e53eaaa6c82339f9b98"
 
                     waitUntil { done in
-                        subject.findUserWithPaymentAddress(paymentAddress) { user, error in
+                        subject.findUserWithPaymentAddress(paymentAddress) { user, _ in
                             expect(user).toNot(beNil())
 
                             expect(user?.name).to(equal("Marijn Schilling"))

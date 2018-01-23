@@ -71,6 +71,9 @@ final class ReceiptView: UIStackView {
 
         addWithDefaultConstraints(view: ethereumAmountLabel)
         addSpacing(.mediumInterItemSpacing, after: ethereumAmountLabel)
+
+        // Add blank text to the ethereum label so there's not a jump in size when it loads
+        ethereumAmountLabel.text = " "
     }
 
     required init(coder aDecoder: NSCoder) {

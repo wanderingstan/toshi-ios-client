@@ -301,7 +301,7 @@
 "sharing_action_item" = "Get Toshi, available for iOS and Android! (https://www.toshi.org)";
 
 /* Dapps */
-"dapp_button_enter" = "Enter";
+"dapp_button_enter" = "Open";
 
 /* Profile */
 "profile_title" = "Profile";

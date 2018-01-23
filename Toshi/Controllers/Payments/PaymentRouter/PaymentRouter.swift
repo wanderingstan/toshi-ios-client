@@ -72,8 +72,11 @@ final class PaymentRouter {
 
         if let dappInfo = dappInfo {
             let paymentConfirmationController = PaymentConfirmationViewController(parameters: paymentViewModel.parameters, recipientType: .dapp(info: dappInfo)) // PaymentConfirmationViewController(withValue: value, andRecipientAddress: address, gasPrice: paymentViewModel.gasPrice, recipientType: .dapp(info: dappInfo), shouldSendSignedTransaction: shouldSendSignedTransaction, skeletonParams: additionalParamaters)
+
+            paymentConfirmationController.backgroundView = Navigator.window?.snapshotView(afterScreenUpdates: false)
+
             paymentConfirmationController.delegate = self
-            paymentConfirmationController.modalPresentationStyle = .currentContext
+            paymentConfirmationController.presentationMethod = .modalBottomSheet
 
             Navigator.presentModally(paymentConfirmationController)
         } else {
