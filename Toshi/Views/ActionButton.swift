@@ -249,7 +249,6 @@ class ActionButton: UIControl {
         UIView.animate(withDuration: 0.2) {
             self.titleLabel.alpha = 0
             self.activityIndicator.alpha = 1
-
         }
     }
 

@@ -288,7 +288,7 @@ extension TabBarController: ScannerViewControllerDelegate {
         self.paidUserInfo = userInfo
 
         if let scannerController = self.scannerController as? ScannerController {
-//            scannerController.setStatusBarHidden(true)
+            scannerController.setStatusBarHidden(true)
 
             SoundPlayer.playSound(type: .scanned)
 

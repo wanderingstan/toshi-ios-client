@@ -341,13 +341,14 @@ extension SOFAWebController: WKScriptMessageHandler {
     private func presentPaymentConfirmation(with messageText: String, parameters: [String: Any], userInfo: UserInfo, dappInfo: DappInfo, callbackId: String) {
         currentTransactionSignCallbackId = callbackId
 
-        paymentRouter = PaymentRouter(parameters: parameters, shouldSendSignedTransaction: false)
-        paymentRouter?.delegate = self
+        let paymentRouter = PaymentRouter(parameters: parameters, shouldSendSignedTransaction: false)
+        paymentRouter.delegate = self
 
-        paymentRouter?.userInfo = userInfo
-        paymentRouter?.dappInfo = dappInfo
-        
-        paymentRouter?.present()
+        paymentRouter.userInfo = userInfo
+        paymentRouter.dappInfo = dappInfo
+        paymentRouter.present()
+
+        self.paymentRouter = paymentRouter
     }
 
     private func approvePayment(with parameters: [String: Any], userInfo _: UserInfo, transaction: String?, callbackId: String) {

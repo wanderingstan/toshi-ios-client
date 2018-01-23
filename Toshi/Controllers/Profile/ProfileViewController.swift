@@ -511,10 +511,13 @@ class ProfileViewController: UIViewController {
     }
     
     @objc private func didTapPayButton() {
-        self.paymentRouter = PaymentRouter(parameters: [PaymentParameters.to: profile.paymentAddress])
-        self.paymentRouter?.delegate = self
-        self.paymentRouter?.userInfo = profile.userInfo
-        self.paymentRouter?.present()
+        let paymentRouter = PaymentRouter(parameters: [PaymentParameters.to: profile.paymentAddress])
+        paymentRouter.delegate = self
+        paymentRouter.userInfo = profile.userInfo
+        paymentRouter.present()
+
+        self.paymentRouter = paymentRouter
+
     }
     
     @objc private func didTapEditProfileButton() {

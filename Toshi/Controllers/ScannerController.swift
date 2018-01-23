@@ -53,6 +53,11 @@ class ScannerController: ScannerViewController {
     override func setupToolbarItems() {
         toolbar.setItems([self.cancelItem], animated: true)
     }
+
+    func setStatusBarHidden(_: Bool) {
+        isStatusBarHidden = true
+        setNeedsStatusBarAppearanceUpdate()
+    }
 }
 
 extension ScannerController: ActivityIndicating {

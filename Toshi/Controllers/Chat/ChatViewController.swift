@@ -701,10 +701,12 @@ extension ChatViewController: UITableViewDataSource {
     }
 
     private func presentPaymentRouter(for parameters: [String: Any]) {
-        self.paymentRouter = PaymentRouter(parameters: parameters)
-        self.paymentRouter?.delegate = self
-        self.paymentRouter?.userInfo = self.thread.recipient()?.userInfo
-        self.paymentRouter?.present()
+        let paymentRouter = PaymentRouter(parameters: parameters)
+        paymentRouter.delegate = self
+        paymentRouter.userInfo = thread.recipient()?.userInfo
+        paymentRouter.present()
+
+        self.paymentRouter = paymentRouter
     }
 }
 
