@@ -117,12 +117,12 @@ extension PaymentRouter: PaymentConfirmationViewControllerDelegate {
 
     func paymentConfirmationViewControllerFinished(on controller: PaymentConfirmationViewController, parameters: [String: Any], transactionHash: String?, error: ToshiError?) {
 
-        guard let tabbarController = Navigator.tabbarController else { return }
-        guard let selectedNavigationController = tabbarController.selectedViewController as? UINavigationController else { return }
+        guard let tabBarController = Navigator.tabbarController else { return }
+        guard let selectedNavigationController = tabBarController.selectedViewController as? UINavigationController else { return }
 
         guard let firstPaymentPresentedController = selectedNavigationController.presentedViewController else { return }
 
-        // Top view controller is alway last one from payment related stack, important to dismiss without animation
+        // Top view controller is always the last one from payment related stack, important to dismiss without animation
         Navigator.topViewController?.dismiss(animated: false, completion: {
             // First present controller in the stack is first in payment related flow, the very root payment related navigation controller which is presented
             // dismissing it - it last step
