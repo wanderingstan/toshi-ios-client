@@ -17,7 +17,7 @@ class PaymentManager {
 
     private(set) var transaction: String?
 
-    var value: NSDecimalNumber {
+    private var value: NSDecimalNumber {
         guard let valueString = parameters[PaymentParameters.value] as? String else { return .zero }
 
         return NSDecimalNumber(hexadecimalString: valueString)

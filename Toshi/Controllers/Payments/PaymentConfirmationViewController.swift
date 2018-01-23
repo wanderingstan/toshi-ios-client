@@ -25,11 +25,11 @@ enum RecipientType {
     dapp(info: DappInfo)
 }
 
-class PaymentConfirmationViewController: UIViewController {
+final class PaymentConfirmationViewController: UIViewController {
 
     weak var delegate: PaymentConfirmationViewControllerDelegate?
 
-    let paymentManager: PaymentManager
+    private let paymentManager: PaymentManager
 
     private var recipientType: RecipientType
     private let shouldSendSignedTransaction: Bool
@@ -304,7 +304,7 @@ class PaymentConfirmationViewController: UIViewController {
         profileDetailsStackView.addWithDefaultConstraints(view: userNameLabel)
     }
 
-    func addDappStackViewLayout(to parentView: UIView, above viewToPinToTopOf: UIView) -> UIView {
+    private func addDappStackViewLayout(to parentView: UIView, above viewToPinToTopOf: UIView) -> UIView {
         let dappStackView = UIStackView()
         dappStackView.axis = .vertical
         dappStackView.alignment = .center
@@ -349,7 +349,7 @@ class PaymentConfirmationViewController: UIViewController {
         return dappStackView
     }
 
-    func addTitleCancelView(to stackView: UIStackView) {
+    private func addTitleCancelView(to stackView: UIStackView) {
         let titleView = UIView()
         titleView.backgroundColor = .clear
 
@@ -366,7 +366,7 @@ class PaymentConfirmationViewController: UIViewController {
         titleView.height(.defaultBarHeight)
     }
 
-    func addBackgroundView(to parentView: UIView, above viewToPinToTopOf: UIView) {
+    private func addBackgroundView(to parentView: UIView, above viewToPinToTopOf: UIView) {
         let background = UIView()
         background.backgroundColor = .clear
 

@@ -15,7 +15,7 @@
 
 import Foundation
 
-class ReceiptLineView: UIStackView {
+final class ReceiptLineView: UIStackView {
 
     private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()

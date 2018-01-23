@@ -8,7 +8,7 @@ protocol PaymentAddressInputDelegate: class {
     func didChangeAddress()
 }
 
-class PaymentAddressInputView: UIView {
+final class PaymentAddressInputView: UIView {
 
     weak var delegate: PaymentAddressInputDelegate?
 

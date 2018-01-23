@@ -50,13 +50,13 @@ enum PaymentControllerContinueOption {
 class PaymentController: UIViewController {
     
     weak var delegate: PaymentControllerDelegate?
-    
-    var paymentType: PaymentControllerPaymentType
-    var continueOption: PaymentControllerContinueOption
-    
-    var valueInWei: NSDecimalNumber?
 
-    lazy var currencyNumberFormatter: NumberFormatter = {
+    var paymentType: PaymentControllerPaymentType
+    private var continueOption: PaymentControllerContinueOption
+
+    private var valueInWei: NSDecimalNumber?
+
+    private lazy var currencyNumberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.maximumFractionDigits = 2
@@ -65,16 +65,16 @@ class PaymentController: UIViewController {
 
         return formatter
     }()
-    
-    lazy var inputNumberFormatter: NumberFormatter = {
+
+    private lazy var inputNumberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.maximumFractionDigits = 2
         
         return formatter
     }()
-    
-    lazy var outputNumberFormatter: NumberFormatter = {
+
+    private lazy var outputNumberFormatter: NumberFormatter = {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
         numberFormatter.maximumFractionDigits = 2
@@ -82,7 +82,7 @@ class PaymentController: UIViewController {
         return numberFormatter
     }()
 
-    lazy var shadowTextField: UITextField = {
+    private lazy var shadowTextField: UITextField = {
         let view = UITextField(withAutoLayout: true)
         view.isHidden = true
         view.accessibilityTraits = UIAccessibilityTraitNotEnabled
@@ -92,7 +92,7 @@ class PaymentController: UIViewController {
         return view
     }()
 
-    lazy var currencyAmountLabel: UILabel = {
+    private lazy var currencyAmountLabel: UILabel = {
         let view = UILabel(withAutoLayout: true)
         view.textAlignment = .center
         view.minimumScaleFactor = 0.25
@@ -103,7 +103,7 @@ class PaymentController: UIViewController {
         return view
     }()
 
-    lazy var etherAmountLabel: UILabel = {
+    private lazy var etherAmountLabel: UILabel = {
         let view = UILabel(withAutoLayout: true)
         view.textAlignment = .center
         view.minimumScaleFactor = 0.25
@@ -160,7 +160,7 @@ class PaymentController: UIViewController {
         shadowTextField.resignFirstResponder()
     }
 
-    func addSubviewsAndConstraints() {
+    private func addSubviewsAndConstraints() {
         view.addSubview(shadowTextField)
         view.addSubview(currencyAmountLabel)
         view.addSubview(etherAmountLabel)

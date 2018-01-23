@@ -51,7 +51,7 @@ class PaymentAddressController: UIViewController {
         return view
     }()
 
-    lazy var scannerController: ScannerViewController = {
+    private lazy var scannerController: ScannerViewController = {
         let controller = ScannerController(instructions: Localized("payment_qr_scanner_instructions"), types: [.qrCode])
         controller.delegate = self
 
@@ -121,7 +121,7 @@ class PaymentAddressController: UIViewController {
         goToConfirmation()
     }
 
-    func goToConfirmation() {
+    private func goToConfirmation() {
         guard let paymentAddress = paymentAddress, EthereumAddress.validate(paymentAddress) else { return }
 
         delegate?.paymentAddressControllerFinished(with: paymentAddress, on: self)

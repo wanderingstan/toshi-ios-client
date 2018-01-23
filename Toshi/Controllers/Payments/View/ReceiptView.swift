@@ -15,7 +15,7 @@
 
 import Foundation
 
-class ReceiptView: UIStackView {
+final class ReceiptView: UIStackView {
 
     private lazy var fiatAmountLine: ReceiptLineView = {
         let amountLine = ReceiptLineView()
