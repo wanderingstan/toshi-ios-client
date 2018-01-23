@@ -3,7 +3,7 @@ import UIKit
 import TinyConstraints
 
 class BalanceController: UIViewController {
-    private var paymentRouter: PaymentRouter?
+    private var paymentRouter = PaymentRouter()
 
     enum BalanceItem: Int {
         case balance, send, deposit
@@ -113,8 +113,7 @@ extension BalanceController: UITableViewDelegate {
 
         switch item {
         case .send:
-            paymentRouter = PaymentRouter()
-            paymentRouter?.present()
+            paymentRouter.present()
         case .deposit:
             guard let current = TokenUser.current else { return }
             let controller = DepositMoneyController(for: current.displayUsername, name: current.name)
