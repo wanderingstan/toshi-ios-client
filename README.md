@@ -2,6 +2,7 @@
 
 ## Running the project
 
+- Requires installation of [Carthage dependency manager](https://github.com/Carthage/Carthage#installing-carthage).
 - Open `Toshi.xcworkspace` and run
 
 ### Code formatting
