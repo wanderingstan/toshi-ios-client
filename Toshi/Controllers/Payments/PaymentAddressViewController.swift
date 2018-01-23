@@ -58,7 +58,8 @@ class PaymentAddressViewController: UIViewController {
         return controller
     }()
 
-    @discardableResult private func validate(_ address: String?) -> Bool {
+    @discardableResult
+    private func validate(_ address: String?) -> Bool {
         let isValid: Bool
         if let address = address, EthereumAddress.validate(address) {
             isValid = true

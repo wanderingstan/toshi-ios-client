@@ -15,11 +15,11 @@
 
 import UIKit
 
-protocol PaymentControllerDelegate: class {
-    func paymentValueControllerFinished(with valueInWei: NSDecimalNumber, on controller: PaymentValueViewController)
+protocol PaymentValueViewControllerDelegate: class {
+    func paymentValueViewControllerControllerFinished(with valueInWei: NSDecimalNumber, on controller: PaymentValueViewController)
 }
 
-enum PaymentControllerPaymentType {
+enum PaymentValueViewControllerPaymentType {
     case request
     case send
     
@@ -33,7 +33,7 @@ enum PaymentControllerPaymentType {
     }
 }
 
-enum PaymentControllerContinueOption {
+enum PaymentValueViewControllerContinueOption {
     case next
     case send
 
@@ -49,10 +49,10 @@ enum PaymentControllerContinueOption {
 
 class PaymentValueViewController: UIViewController {
     
-    weak var delegate: PaymentControllerDelegate?
+    weak var delegate: PaymentValueViewControllerDelegate?
 
-    var paymentType: PaymentControllerPaymentType
-    private var continueOption: PaymentControllerContinueOption
+    var paymentType: PaymentValueViewControllerPaymentType
+    private var continueOption: PaymentValueViewControllerContinueOption
 
     private var valueInWei: NSDecimalNumber?
 
@@ -120,7 +120,7 @@ class PaymentValueViewController: UIViewController {
         self.defaultActiveNetworkView()
     }()
     
-    init(withPaymentType paymentType: PaymentControllerPaymentType, continueOption: PaymentControllerContinueOption) {
+    init(withPaymentType paymentType: PaymentValueViewControllerPaymentType, continueOption: PaymentValueViewControllerContinueOption) {
         self.paymentType = paymentType
         self.continueOption = continueOption
         super.init(nibName: nil, bundle: nil)
@@ -185,7 +185,7 @@ class PaymentValueViewController: UIViewController {
     @objc func continueItemTapped(_ item: UIBarButtonItem) {
         guard let value = valueInWei else { return }
 
-        delegate?.paymentValueControllerFinished(with: value, on: self)
+        delegate?.paymentValueViewControllerControllerFinished(with: value, on: self)
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {

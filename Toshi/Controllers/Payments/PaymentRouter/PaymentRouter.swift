@@ -102,8 +102,8 @@ final class PaymentRouter {
     }
 }
 
-extension PaymentRouter: PaymentControllerDelegate {
-    func paymentValueControllerFinished(with valueInWei: NSDecimalNumber, on controller: PaymentValueViewController) {
+extension PaymentRouter: PaymentValueViewControllerDelegate {
+    func paymentValueViewControllerControllerFinished(with valueInWei: NSDecimalNumber, on controller: PaymentValueViewController) {
         paymentViewModel.value = valueInWei
         present()
     }
@@ -120,10 +120,9 @@ extension PaymentRouter: PaymentConfirmationViewControllerDelegate {
 
     func paymentConfirmationViewControllerFinished(on controller: PaymentConfirmationViewController, parameters: [String: Any], transactionHash: String?, error: ToshiError?) {
 
-        guard let tabBarController = Navigator.tabbarController else { return }
-        guard let selectedNavigationController = tabBarController.selectedViewController as? UINavigationController else { return }
-
-        guard let firstPaymentPresentedController = selectedNavigationController.presentedViewController else { return }
+        guard let tabBarController = Navigator.tabbarController,
+              let selectedNavigationController = tabBarController.selectedViewController as? UINavigationController,
+              let firstPaymentPresentedController = selectedNavigationController.presentedViewController else { return }
 
         // Top view controller is always the last one from payment related stack, important to dismiss without animation
         Navigator.topViewController?.dismiss(animated: false, completion: {

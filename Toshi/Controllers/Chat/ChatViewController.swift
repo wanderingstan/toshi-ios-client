@@ -881,10 +881,10 @@ extension ChatViewController: ChatFloatingHeaderViewDelegate {
 
     func messagesFloatingView(_: ChatFloatingHeaderView, didPressRequestButton _: UIButton) {
         
-        let paymentController = PaymentValueViewController(withPaymentType: .request, continueOption: .send)
-        paymentController.delegate = self
+        let paymentValueViewController = PaymentValueViewController(withPaymentType: .request, continueOption: .send)
+        paymentValueViewController.delegate = self
 
-        let navigationController = PaymentNavigationController(rootViewController: paymentController)
+        let navigationController = PaymentNavigationController(rootViewController: paymentValueViewController)
         Navigator.presentModally(navigationController)
     }
 
@@ -943,9 +943,9 @@ extension ChatViewController: PaymentRouterDelegate {
     }
 }
 
-extension ChatViewController: PaymentControllerDelegate {
+extension ChatViewController: PaymentValueViewControllerDelegate {
 
-    func paymentValueControllerFinished(with valueInWei: NSDecimalNumber, on controller: PaymentValueViewController) {
+    func paymentValueViewControllerControllerFinished(with valueInWei: NSDecimalNumber, on controller: PaymentValueViewController) {
         defer { dismiss(animated: true) }
 
         if controller.paymentType == .request {

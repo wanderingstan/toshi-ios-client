@@ -443,10 +443,6 @@ final class PaymentConfirmationViewController: UIViewController {
     }
 
     // MARK: - Animation
-    private func addBackgroundView(to parentView: UIView, above viewToPinToTopOf: UIView) {
-        let background = UIView()
-        background.backgroundColor = .clear
-    }
 
     private func setReceiptShowing(_ showing: Bool, animated: Bool = true, completion: (() -> Void)? = nil) {
         guard let bottomConstraint = bottomOfReceiptConstraint else { /* nothing to adjust yet */ return }

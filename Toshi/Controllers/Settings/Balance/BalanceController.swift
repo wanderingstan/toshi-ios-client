@@ -6,7 +6,9 @@ class BalanceController: UIViewController {
     private var paymentRouter: PaymentRouter?
     
     enum BalanceItem: Int {
-        case balance, send, deposit
+        case balance,
+             send,
+             deposit
     }
 
     var balance: NSDecimalNumber? {
@@ -121,7 +123,8 @@ extension BalanceController: UITableViewDelegate {
             guard let current = TokenUser.current else { return }
             let controller = DepositMoneyController(for: current.displayUsername, name: current.name)
             self.navigationController?.pushViewController(controller, animated: true)
-        default: break
+        default:
+            break
         }
     }
 }
