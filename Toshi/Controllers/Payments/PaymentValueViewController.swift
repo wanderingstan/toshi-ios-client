@@ -16,7 +16,7 @@
 import UIKit
 
 protocol PaymentControllerDelegate: class {
-    func paymentValueControllerFinished(with valueInWei: NSDecimalNumber, on controller: PaymentController)
+    func paymentValueControllerFinished(with valueInWei: NSDecimalNumber, on controller: PaymentValueViewController)
 }
 
 enum PaymentControllerPaymentType {
@@ -47,7 +47,7 @@ enum PaymentControllerContinueOption {
     }
 }
 
-class PaymentController: UIViewController {
+class PaymentValueViewController: UIViewController {
     
     weak var delegate: PaymentControllerDelegate?
 
@@ -193,7 +193,7 @@ class PaymentController: UIViewController {
     }
 }
 
-extension PaymentController: UITextFieldDelegate {
+extension PaymentValueViewController: UITextFieldDelegate {
 
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let newValue = (textField.text as NSString?)?.replacingCharacters(in: range, with: string) else {
@@ -244,14 +244,14 @@ extension PaymentController: UITextFieldDelegate {
     }
 }
 
-extension PaymentController: UIToolbarDelegate {
+extension PaymentValueViewController: UIToolbarDelegate {
 
     func position(for _: UIBarPositioning) -> UIBarPosition {
         return .topAttached
     }
 }
 
-extension PaymentController: ActiveNetworkDisplaying {
+extension PaymentValueViewController: ActiveNetworkDisplaying {
 
     var activeNetworkView: ActiveNetworkView {
         return networkView

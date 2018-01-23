@@ -4,10 +4,10 @@ import TinyConstraints
 import CameraScanner
 
 protocol PaymentAddressControllerDelegate: class {
-    func paymentAddressControllerFinished(with address: String, on controller: PaymentAddressController)
+    func paymentAddressControllerFinished(with address: String, on controller: PaymentAddressViewController)
 }
 
-class PaymentAddressController: UIViewController {
+class PaymentAddressViewController: UIViewController {
 
     private let valueInWei: NSDecimalNumber
 
@@ -128,7 +128,7 @@ class PaymentAddressController: UIViewController {
     }
 }
 
-extension PaymentAddressController: ScannerViewControllerDelegate {
+extension PaymentAddressViewController: ScannerViewControllerDelegate {
     
     func scannerViewControllerDidCancel(_ controller: ScannerViewController) {
         controller.dismiss(animated: true, completion: nil)
@@ -175,7 +175,7 @@ extension PaymentAddressController: ScannerViewControllerDelegate {
     }
 }
 
-extension PaymentAddressController: PaymentAddressInputDelegate {
+extension PaymentAddressViewController: PaymentAddressInputDelegate {
 
     func didRequestScanner() {
         Navigator.presentModally(scannerController)

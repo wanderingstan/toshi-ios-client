@@ -55,14 +55,14 @@ final class PaymentRouter {
     }
 
     private func presentPaymentValueController() {
-        let paymentValueController = PaymentController(withPaymentType: .send, continueOption: .next)
+        let paymentValueController = PaymentValueViewController(withPaymentType: .send, continueOption: .next)
         paymentValueController.delegate = self
 
         presentViewControllerOnNavigator(paymentValueController)
     }
 
     private func presentRecipientAddressController(withValue value: NSDecimalNumber) {
-        let addressController = PaymentAddressController(with: value)
+        let addressController = PaymentAddressViewController(with: value)
         addressController.delegate = self
 
         presentViewControllerOnNavigator(addressController)
@@ -100,14 +100,14 @@ final class PaymentRouter {
 }
 
 extension PaymentRouter: PaymentControllerDelegate {
-    func paymentValueControllerFinished(with valueInWei: NSDecimalNumber, on controller: PaymentController) {
+    func paymentValueControllerFinished(with valueInWei: NSDecimalNumber, on controller: PaymentValueViewController) {
         paymentViewModel.value = valueInWei
         present()
     }
 }
 
 extension PaymentRouter: PaymentAddressControllerDelegate {
-    func paymentAddressControllerFinished(with address: String, on controller: PaymentAddressController) {
+    func paymentAddressControllerFinished(with address: String, on controller: PaymentAddressViewController) {
         paymentViewModel.recipientAddress = address
         present()
     }
